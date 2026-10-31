@@ -11,6 +11,27 @@ const SPREADSHEET_ID = '1mEuMm3Pntsn3HenWQ33aNlRG50W9daVM5HjrV9pmxY8';
 const TARGET_SHEET = 'Chi tiết công MN (Tỉnh & HCM)';
 const LOCAL_API_BASE = 'http://localhost:3001/api/chamcong';
 
+// Danh sách mã và họ tên nhân sự Team HCM (còn lại thuộc Team Tỉnh)
+const HCM_STAFF_CODES = ['8467', '8440', '8447', '8437', '8231', '8448', '8462'];
+const HCM_STAFF_NAMES = [
+    '8467 - Nguyễn Thành Đạt - Customer Success',
+    '8440 - Doãn Việt Tùng - Customer Success - SGN',
+    '8447 - Võ Khánh Duy - Customer Success - SGN',
+    '8437 - Nguyễn Đoàn Hưng Phát - Customer Success - SGN',
+    '8231 - Thượng Thái Hiếu - Customer Success - SGN',
+    '8448 - Nguyễn Đỗ Nhật Minh - Customer Success',
+    '8462 - Nguyễn Hoàng Khang - Customer Success'
+];
+
+function getStaffTeam(staffName, maNv) {
+    const sName = String(staffName || '').trim();
+    const sCode = String(maNv || '').trim().toUpperCase();
+    const isHCM = HCM_STAFF_CODES.some(id => sName.startsWith(id) || sName.includes(id)) ||
+                  HCM_STAFF_NAMES.some(h => sName.toLowerCase().includes(h.toLowerCase())) ||
+                  sCode.startsWith('SG');
+    return isHCM ? 'HCM' : 'TINH';
+}
+
 window.chamCongCurrentDay = (new Date()).getDate().toString();
 window.chamCongData = [];
 window.chamCongEditedRows = {};
@@ -279,7 +300,7 @@ let chamCongNoticeTimer = null;
         html.dark-theme .cc-control-heading { color: #cbd5e1; }
         .cc-filter-grid {
             display: grid;
-            grid-template-columns: minmax(160px, 1.2fr) minmax(145px, 1fr) minmax(130px, .9fr);
+            grid-template-columns: minmax(130px, 1fr) minmax(160px, 1.2fr) minmax(130px, 1fr) minmax(95px, 0.8fr) minmax(95px, 0.8fr) auto;
             align-items: end; gap: 8px;
         }
         .cc-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
@@ -645,17 +666,25 @@ function updateChamCongViewToggleButtons() {
 
 function resetChamCongFilters() {
     const searchEl = document.getElementById('chamCongSearchInput');
+    const teamEl = document.getElementById('chamCongTeamFilter');
     const staffEl = document.getElementById('chamCongStaffFilter');
     const statusEl = document.getElementById('chamCongStatusFilter');
     const fromEl = document.getElementById('chamCongDayFrom');
     const toEl = document.getElementById('chamCongDayTo');
     if (searchEl) searchEl.value = '';
+    if (teamEl) teamEl.value = 'ALL';
+    populateChamCongStaffFilter();
     if (staffEl) staffEl.value = 'ALL';
     if (statusEl) statusEl.value = 'ALL';
     if (fromEl) fromEl.value = '';
     if (toEl) toEl.value = '';
     renderChamCongView();
     showChamCongNotice('Đã xóa bộ lọc, đang hiển thị toàn bộ dữ liệu.', 'info');
+}
+
+function onChamCongTeamChange() {
+    populateChamCongStaffFilter();
+    renderChamCongView();
 }
 
 function showChamCongNotice(message, type = 'info') {
@@ -698,11 +727,28 @@ function getStaffCleanName(fullName) {
 function populateChamCongStaffFilter() {
     const sel = document.getElementById('chamCongStaffFilter');
     if (!sel || !window.chamCongAllData) return;
+    const teamSel = document.getElementById('chamCongTeamFilter');
+    const selectedTeam = teamSel ? teamSel.value : 'ALL';
     const currentVal = sel.value;
-    const staffList = [...new Set(window.chamCongAllData.map(r => r.staff).filter(Boolean))].sort();
+
+    let availableStaff = window.chamCongAllData;
+    if (selectedTeam !== 'ALL') {
+        availableStaff = availableStaff.filter(r => getStaffTeam(r.staff, r.ma_nv) === selectedTeam);
+    }
+
+    const staffList = [...new Set(availableStaff.map(r => r.staff).filter(Boolean))].sort();
     sel.innerHTML = '<option value="ALL">Tất cả nhân sự</option>' +
-        staffList.map(s => `<option value="${escapeChamCongHTML(s)}">${escapeChamCongHTML(s)}</option>`).join('');
-    if (staffList.includes(currentVal)) sel.value = currentVal;
+        staffList.map(s => {
+            const team = getStaffTeam(s);
+            const teamPrefix = (selectedTeam === 'ALL') ? (team === 'HCM' ? '[HCM] ' : '[Tỉnh] ') : '';
+            return `<option value="${escapeChamCongHTML(s)}">${teamPrefix}${escapeChamCongHTML(s)}</option>`;
+        }).join('');
+
+    if (staffList.includes(currentVal)) {
+        sel.value = currentVal;
+    } else {
+        sel.value = 'ALL';
+    }
 }
 
 function getEffectiveChamCongValue(row, field) {
@@ -767,12 +813,14 @@ function hasChamCongWorkSignal(row) {
 
 function filterChamCongData() {
     const searchInput = document.getElementById('chamCongSearchInput');
+    const teamSelect = document.getElementById('chamCongTeamFilter');
     const statusSelect = document.getElementById('chamCongStatusFilter');
     const staffSelect = document.getElementById('chamCongStaffFilter');
     const fromEl = document.getElementById('chamCongDayFrom');
     const toEl = document.getElementById('chamCongDayTo');
 
     const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const teamVal = teamSelect ? teamSelect.value : 'ALL';
     const statusVal = statusSelect ? statusSelect.value : 'ALL';
     const staffVal = staffSelect ? staffSelect.value : 'ALL';
 
@@ -785,6 +833,7 @@ function filterChamCongData() {
         const staffName = (r.staff || '').toLowerCase();
         const staffCode = String(r.ma_nv || '').toLowerCase();
         const chamCongVal = String(getEffectiveChamCongValue(r, 'cham_cong')).trim();
+        const staffTeam = getStaffTeam(r.staff, r.ma_nv);
 
         let matchesDate = true;
         if (fromDay !== null || toDay !== null) {
@@ -794,6 +843,7 @@ function filterChamCongData() {
             if (toDay !== null && dayNum > toDay) matchesDate = false;
         }
 
+        const matchesTeam = teamVal === 'ALL' || staffTeam === teamVal;
         const matchesSearch = !searchVal || staffName.includes(searchVal) || staffCode.includes(searchVal);
         const matchesStaff = staffVal === 'ALL' || r.staff === staffVal;
 
@@ -806,7 +856,7 @@ function filterChamCongData() {
             matchesStatus = chamCongVal.toUpperCase() === statusVal.toUpperCase();
         }
 
-        return matchesDate && matchesSearch && matchesStaff && matchesStatus;
+        return matchesDate && matchesTeam && matchesSearch && matchesStaff && matchesStatus;
     });
 }
 
@@ -891,6 +941,11 @@ function renderChamCongMobileCards(data, container) {
             `;
         }).join('');
 
+        const staffTeam = getStaffTeam(fullName, row.ma_nv);
+        const teamBadge = staffTeam === 'HCM'
+            ? '<span style="font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); color:#2563eb; padding:2px 6px; border-radius:4px;">Team HCM</span>'
+            : '<span style="font-size:10px; font-weight:700; background:rgba(16,185,129,0.15); color:#059669; padding:2px 6px; border-radius:4px;">Team Tỉnh</span>';
+
         html += `
         <div id="cc_card_${rowIdx}" class="cc-card ${isEdited ? 'edited' : ''}">
             <div class="cc-card-header">
@@ -898,7 +953,10 @@ function renderChamCongMobileCards(data, container) {
                     <div class="cc-avatar">${initials}</div>
                     <div>
                         <div class="cc-staff-name">${cleanName}</div>
-                        <div class="cc-staff-sub">${fullName.split('-')[0] || ''}</div>
+                        <div class="cc-staff-sub" style="display:flex; align-items:center; gap:6px; margin-top:2px;">
+                            <span>${fullName.split('-')[0] || ''}</span>
+                            ${teamBadge}
+                        </div>
                     </div>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap:3px;">
@@ -1011,10 +1069,15 @@ function renderChamCongDesktopTable(data, container) {
             `;
         }).join(' ');
 
+        const staffTeam = getStaffTeam(staff, r.ma_nv);
+        const teamBadge = staffTeam === 'HCM'
+            ? '<span style="font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); color:#2563eb; padding:2px 6px; border-radius:4px; margin-left:6px;">HCM</span>'
+            : '<span style="font-size:10px; font-weight:700; background:rgba(16,185,129,0.15); color:#059669; padding:2px 6px; border-radius:4px; margin-left:6px;">Tỉnh</span>';
+
         html += `
         <tr id="cc_row_${rowIdx}" class="${isEdited ? 'cc-edited-row' : ''}">
             <td style="text-align:center;">${idx + 1}</td>
-            <td style="text-align:left; font-weight:600;">${staff}</td>
+            <td style="text-align:left; font-weight:600;">${staff} ${teamBadge}</td>
             <td style="text-align:center; font-size:12px;">${thuNgay}</td>
             <td style="text-align:center; font-size:12px;">${inOut}</td>
             <td style="text-align:center; font-size:12px;">${totalAct}</td>

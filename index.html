@@ -996,9 +996,13 @@
                 <div class="cc-control-section">
                     <div class="cc-control-heading">🔎 Bộ lọc hiển thị</div>
                     <div class="cc-filter-grid">
-                        <label class="cc-field cc-field-search">
-                            <span>Tìm nhân sự</span>
-                            <input type="text" id="chamCongSearchInput" oninput="renderChamCongView()" placeholder="Nhập tên hoặc mã nhân viên...">
+                        <label class="cc-field">
+                            <span>Team</span>
+                            <select id="chamCongTeamFilter" onchange="onChamCongTeamChange()" class="ldr-select">
+                                <option value="ALL">🏢 Tất cả team</option>
+                                <option value="TINH">🌄 Team tỉnh</option>
+                                <option value="HCM">🏙️ Team HCM</option>
+                            </select>
                         </label>
                         <label class="cc-field">
                             <span>Nhân sự</span>
@@ -1023,7 +1027,7 @@
                         <label class="cc-field cc-field-day">
                             <span>Từ ngày</span>
                             <select id="chamCongDayFrom" onchange="onChamCongDateChange()" class="ldr-select">
-                                <option value="">Dầu kỳ</option>
+                                <option value="">Đầu kỳ</option>
                             </select>
                         </label>
                         <label class="cc-field cc-field-day">
