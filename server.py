@@ -105,6 +105,21 @@ class ChamCongHandler(BaseHTTPRequestHandler):
                 self._set_headers(500)
                 err_resp = {'status': 'error', 'message': str(e)}
                 self.wfile.write(json.dumps(err_resp, ensure_ascii=False).encode('utf-8'))
+        elif parsed.path == '/api/chamcong/monthly' or parsed.path == '/api/chamcong/monthly/':
+            try:
+                service = get_sheets_service()
+                result = service.spreadsheets().values().get(
+                    spreadsheetId=SPREADSHEET_ID,
+                    range=f"'{TARGET_SHEET}'!B502:O519"
+                ).execute()
+                rows = result.get('values', [])
+                self._set_headers(200)
+                self.wfile.write(json.dumps({'status': 'success', 'data': rows}, ensure_ascii=False).encode('utf-8'))
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                self._set_headers(500)
+                self.wfile.write(json.dumps({'status': 'error', 'message': str(e)}, ensure_ascii=False).encode('utf-8'))
         else:
             self._set_headers(404)
             self.wfile.write(json.dumps({'status': 'error', 'message': 'Endpoint not found'}, ensure_ascii=False).encode('utf-8'))

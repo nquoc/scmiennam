@@ -35,6 +35,7 @@ function getStaffTeam(staffName, maNv) {
 window.chamCongCurrentDay = (new Date()).getDate().toString();
 window.chamCongData = [];
 window.chamCongEditedRows = {};
+window.chamCongMonthlyData = null;
 window.chamCongViewMode = (window.innerWidth <= 768) ? 'card' : 'table';
 window.chamCongConnectionMode = '';
 let directTokenCache = { token: null, expiresAt: 0 };
@@ -389,6 +390,132 @@ let chamCongNoticeTimer = null;
             .cc-filter-grid { grid-template-columns: 1fr 1fr; }
             .cc-field-search, .cc-field:not(.cc-field-day), .cc-filter-reset { grid-column: span 2; }
         }
+        .cc-btn-monthly {
+            background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+            color: #ffffff !important;
+            font-weight: 750 !important;
+            border: none !important;
+            border-radius: 8px !important;
+            box-shadow: 0 3px 10px rgba(79,70,229,0.3) !important;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .cc-btn-monthly:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 14px rgba(79,70,229,0.4) !important;
+        }
+        .cc-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(4px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        .cc-modal.hidden { display: none !important; }
+        .cc-modal-content {
+            background: var(--card-bg, #ffffff);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 1350px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+            border: 1px solid var(--border-color, #cbd5e1);
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        html.dark-theme .cc-modal-content {
+            background: #0f172a;
+            border-color: #334155;
+            color: #f1f5f9;
+        }
+        .cc-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
+            background: rgba(248, 250, 252, 0.95);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        html.dark-theme .cc-modal-header {
+            background: #1e293b;
+            border-bottom-color: #334155;
+        }
+        .cc-modal-close {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #64748b;
+            padding: 4px 10px;
+            border-radius: 6px;
+            line-height: 1;
+        }
+        .cc-modal-close:hover {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+        .cc-modal-body {
+            padding: 16px 20px;
+            overflow: auto;
+            flex: 1;
+        }
+        .cc-monthly-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 12.5px;
+        }
+        .cc-monthly-table th {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 750;
+            font-size: 11.5px;
+            padding: 10px 10px;
+            border-bottom: 2px solid #cbd5e1;
+            text-align: center;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        html.dark-theme .cc-monthly-table th {
+            background: #1e293b;
+            color: #cbd5e1;
+            border-bottom-color: #475569;
+        }
+        .cc-monthly-table td {
+            padding: 9px 10px;
+            border-bottom: 1px solid var(--border-color, #e2e8f0);
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        html.dark-theme .cc-monthly-table td {
+            border-bottom-color: #334155;
+        }
+        .cc-monthly-table tbody tr:hover {
+            background: rgba(59, 130, 246, 0.04);
+        }
+        html.dark-theme .cc-monthly-table tbody tr:hover {
+            background: rgba(59, 130, 246, 0.12);
+        }
+        .cc-monthly-total-row {
+            background: #f1f5f9 !important;
+            font-weight: 800;
+        }
+        html.dark-theme .cc-monthly-total-row {
+            background: #1e293b !important;
+            color: #38bdf8;
+        }
     `;
     document.head.appendChild(style);
 })();
@@ -474,6 +601,11 @@ async function getDirectAccessToken() {
 function initChamCongTab() {
     updateChamCongViewToggleButtons();
     updateChamCongSubmitButtonState();
+
+    const teamFilterEl = document.getElementById('chamCongTeamFilter');
+    if (teamFilterEl) {
+        teamFilterEl.onchange = onChamCongTeamChange;
+    }
 
     // Load all rows once, then every action works on the filtered visible slice.
     if (!Array.isArray(window.chamCongAllData) || window.chamCongAllData.length === 0) {
@@ -683,9 +815,18 @@ function resetChamCongFilters() {
 }
 
 function onChamCongTeamChange() {
+    const staffSel = document.getElementById('chamCongStaffFilter');
+    if (staffSel) staffSel.value = 'ALL';
     populateChamCongStaffFilter();
     renderChamCongView();
+
+    const teamSel = document.getElementById('chamCongTeamFilter');
+    const teamVal = teamSel ? teamSel.value : 'ALL';
+    const teamName = teamVal === 'HCM' ? '🏙️ Team HCM' : (teamVal === 'TINH' ? '🌄 Team Tỉnh' : '🏢 Tất cả Team');
+    const count = (window.chamCongData || []).length;
+    showChamCongNotice(`Đã lọc theo ${teamName} (${count} dòng)`, 'info');
 }
+window.onChamCongTeamChange = onChamCongTeamChange;
 
 function showChamCongNotice(message, type = 'info') {
     const el = document.getElementById('chamCongActionNotice');
@@ -820,9 +961,9 @@ function filterChamCongData() {
     const toEl = document.getElementById('chamCongDayTo');
 
     const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
-    const teamVal = teamSelect ? teamSelect.value : 'ALL';
-    const statusVal = statusSelect ? statusSelect.value : 'ALL';
-    const staffVal = staffSelect ? staffSelect.value : 'ALL';
+    const teamVal = (teamSelect && teamSelect.value) ? teamSelect.value.trim().toUpperCase() : 'ALL';
+    const statusVal = (statusSelect && statusSelect.value) ? statusSelect.value : 'ALL';
+    const staffVal = (staffSelect && staffSelect.value) ? staffSelect.value : 'ALL';
 
     const fromDay = fromEl && fromEl.value ? Number(fromEl.value) : null;
     const toDay = toEl && toEl.value ? Number(toEl.value) : null;
@@ -843,9 +984,9 @@ function filterChamCongData() {
             if (toDay !== null && dayNum > toDay) matchesDate = false;
         }
 
-        const matchesTeam = teamVal === 'ALL' || staffTeam === teamVal;
+        const matchesTeam = (!teamVal || teamVal === 'ALL') || (staffTeam === teamVal);
         const matchesSearch = !searchVal || staffName.includes(searchVal) || staffCode.includes(searchVal);
-        const matchesStaff = staffVal === 'ALL' || r.staff === staffVal;
+        const matchesStaff = (!staffVal || staffVal === 'ALL') || (r.staff === staffVal);
 
         let matchesStatus = true;
         if (statusVal === 'DONE') {
@@ -1320,4 +1461,190 @@ async function submitChamCongToGoogleSheets() {
             updateChamCongSubmitButtonState();
         }
     }
+}
+
+// --- BẢNG TỔNG HỢP THÔNG TIN CHẤM CÔNG TRONG THÁNG (B502:O519) ---
+
+function openMonthlyChamCongModal() {
+    const modal = document.getElementById('chamCongMonthlyModal');
+    if (modal) modal.classList.remove('hidden');
+    fetchMonthlyChamCongData();
+}
+window.openMonthlyChamCongModal = openMonthlyChamCongModal;
+
+function closeMonthlyChamCongModal() {
+    const modal = document.getElementById('chamCongMonthlyModal');
+    if (modal) modal.classList.add('hidden');
+}
+window.closeMonthlyChamCongModal = closeMonthlyChamCongModal;
+
+async function fetchMonthlyChamCongData(forceRefresh = false) {
+    if (!forceRefresh && window.chamCongMonthlyData && window.chamCongMonthlyData.length > 0) {
+        renderMonthlyModalTable();
+        return;
+    }
+
+    const bodyEl = document.getElementById('chamCongMonthlyModalBody');
+    if (bodyEl) {
+        bodyEl.innerHTML = '<div style="text-align:center; padding:50px 20px; color:#64748b; font-style:italic;">⏳ Đang kết nối tải dữ liệu tổng hợp B502:O519 từ Google Sheets...</div>';
+    }
+
+    try {
+        let rows = null;
+        // Try local server first
+        try {
+            const locRes = await fetch(`${LOCAL_API_BASE}/monthly`);
+            if (locRes.ok) {
+                const locJson = await locRes.json();
+                if (locJson.status === 'success' && Array.isArray(locJson.data)) {
+                    rows = locJson.data;
+                }
+            }
+        } catch (e) {
+            // fallback
+        }
+
+        if (!rows) {
+            const token = await getDirectAccessToken();
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/'${encodeURIComponent(TARGET_SHEET)}'!B502:O519`;
+            const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+            if (!res.ok) throw new Error(`Google Sheets API Error ${res.status}`);
+            const dataJson = await res.json();
+            rows = dataJson.values || [];
+        }
+
+        window.chamCongMonthlyData = rows;
+        renderMonthlyModalTable();
+    } catch (err) {
+        console.error("Lỗi tải B502:O519:", err);
+        if (bodyEl) {
+            bodyEl.innerHTML = `
+                <div style="text-align:center; padding:30px; color:#ef4444; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:10px;">
+                    <h4 style="margin-top:0;">⚠️ Không thể tải dữ liệu Tổng hợp trong tháng</h4>
+                    <p style="font-size:13px; margin-bottom:12px;">${err.message}</p>
+                    <button class="cc-btn cc-btn-primary" onclick="fetchMonthlyChamCongData(true)">🔄 Thử lại</button>
+                </div>
+            `;
+        }
+    }
+}
+window.fetchMonthlyChamCongData = fetchMonthlyChamCongData;
+
+function renderMonthlyModalTable() {
+    const container = document.getElementById('chamCongMonthlyModalBody');
+    if (!container) return;
+
+    const rawRows = window.chamCongMonthlyData;
+    if (!Array.isArray(rawRows) || rawRows.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:30px; color:#64748b;">Chưa có dữ liệu tổng hợp. Bấm "Tải lại" để lấy dữ liệu mới nhất.</div>';
+        return;
+    }
+
+    const filterTeam = document.getElementById('monthlyModalTeamFilter')?.value || 'ALL';
+    const headers = rawRows[0] || [];
+    const staffRows = rawRows.slice(1, -1); // rows 1 to 16
+    const totalRow = rawRows[rawRows.length - 1]; // row 17 (TỔNG CỘNG)
+
+    // Filter staff rows
+    const visibleStaffRows = staffRows.filter(r => {
+        if (!r || !r[0]) return false;
+        if (filterTeam === 'ALL') return true;
+        const staffTeam = getStaffTeam(r[0], r[1]);
+        return staffTeam === filterTeam;
+    });
+
+    let theadHtml = '<tr><th style="width:40px;">STT</th>';
+    headers.forEach((h, idx) => {
+        const align = idx === 0 ? 'left' : (idx === 1 ? 'center' : 'center');
+        theadHtml += `<th style="text-align:${align};">${escapeChamCongHTML(h)}</th>`;
+    });
+    theadHtml += '</tr>';
+
+    let tbodyHtml = '';
+    visibleStaffRows.forEach((r, idx) => {
+        const fullName = r[0] || '';
+        const code = r[1] || '';
+        const team = getStaffTeam(fullName, code);
+        const teamBadge = team === 'HCM'
+            ? '<span style="font-size:9.5px; font-weight:700; background:rgba(59,130,246,0.15); color:#2563eb; padding:2px 5px; border-radius:4px; margin-left:5px;">HCM</span>'
+            : '<span style="font-size:9.5px; font-weight:700; background:rgba(16,185,129,0.15); color:#059669; padding:2px 5px; border-radius:4px; margin-left:5px;">Tỉnh</span>';
+
+        tbodyHtml += '<tr>';
+        tbodyHtml += `<td style="text-align:center; color:#94a3b8; font-weight:600;">${idx + 1}</td>`;
+        tbodyHtml += `<td style="text-align:left; font-weight:700;">${escapeChamCongHTML(fullName)} ${teamBadge}</td>`;
+        tbodyHtml += `<td style="text-align:center;"><span style="background:rgba(100,116,139,0.1); padding:2px 6px; border-radius:4px; font-weight:600; font-size:11px;">${escapeChamCongHTML(code)}</span></td>`;
+
+        for (let col = 2; col < headers.length; col++) {
+            const val = r[col] !== undefined ? r[col] : '';
+            const num = parseFloat(val);
+            let color = 'inherit';
+            let weight = 'normal';
+
+            if (col === 2) { color = '#10b981'; weight = '700'; } // T công
+            else if (col === 3) { color = '#f59e0b'; } // T phép
+            else if (col === 4) { color = '#64748b'; } // T OFF
+            else if (col === 8) { color = '#0284c7'; weight = '700'; } // Tổng ATC
+            else if (col === 10) { color = '#8b5cf6'; weight = '700'; } // Tổng Điểm
+            else if (col === 12) { color = '#e11d48'; weight = '700'; } // Tổng Impact
+
+            const formatted = (!isNaN(num) && val !== '') ? ((num % 1 === 0) ? num : num.toFixed(2)) : (val || '-');
+            tbodyHtml += `<td style="text-align:center; font-weight:${weight}; color:${color};">${escapeChamCongHTML(formatted)}</td>`;
+        }
+        tbodyHtml += '</tr>';
+    });
+
+    // Summary Row
+    let summaryCells = '';
+    if (filterTeam === 'ALL' && totalRow) {
+        summaryCells += `<td style="text-align:center; font-weight:800;">∑</td>`;
+        summaryCells += `<td style="text-align:left; font-weight:800; color:#2563eb;">${escapeChamCongHTML(totalRow[0] || 'TỔNG CỘNG')} (16 NS)</td>`;
+        summaryCells += `<td style="text-align:center;">-</td>`;
+        for (let col = 2; col < headers.length; col++) {
+            const val = totalRow[col] !== undefined ? totalRow[col] : '';
+            const num = parseFloat(val);
+            const formatted = (!isNaN(num) && val !== '') ? ((num % 1 === 0) ? num : num.toFixed(2)) : (val || '-');
+            summaryCells += `<td style="text-align:center; font-weight:800;">${escapeChamCongHTML(formatted)}</td>`;
+        }
+    } else {
+        // Calculate subtotal for visible team
+        const teamLabel = filterTeam === 'HCM' ? 'TỔNG CỘNG (TEAM HCM - 7 NS)' : 'TỔNG CỘNG (TEAM TỈNH - 9 NS)';
+        summaryCells += `<td style="text-align:center; font-weight:800;">∑</td>`;
+        summaryCells += `<td style="text-align:left; font-weight:800; color:#2563eb;">${teamLabel}</td>`;
+        summaryCells += `<td style="text-align:center;">-</td>`;
+
+        for (let col = 2; col < headers.length; col++) {
+            let colSum = 0;
+            let hasNumber = false;
+            visibleStaffRows.forEach(r => {
+                const n = parseFloat(r[col]);
+                if (!isNaN(n)) {
+                    colSum += n;
+                    hasNumber = true;
+                }
+            });
+            const displaySum = hasNumber ? ((colSum % 1 === 0) ? colSum : colSum.toFixed(2)) : '-';
+            summaryCells += `<td style="text-align:center; font-weight:800;">${displaySum}</td>`;
+        }
+    }
+
+    const tfootHtml = `<tr class="cc-monthly-total-row">${summaryCells}</tr>`;
+
+    container.innerHTML = `
+        <div style="overflow-x:auto;">
+            <table class="cc-monthly-table">
+                <thead>${theadHtml}</thead>
+                <tbody>${tbodyHtml}</tbody>
+                <tfoot>${tfootHtml}</tfoot>
+            </table>
+        </div>
+    `;
+}
+window.renderMonthlyModalTable = renderMonthlyModalTable;
+
+// Attach listeners on load
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        const teamSel = document.getElementById('chamCongTeamFilter');
+        if (teamSel) teamSel.addEventListener('change', onChamCongTeamChange);
+    });
 }

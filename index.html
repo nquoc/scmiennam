@@ -10,7 +10,7 @@
     <meta property="og:image" content="hinh-nen-meme-sieu-hai-huoc-anh-che-viral.jpg">
     <meta property="og:type" content="website">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="style.css?v=40">
+    <link rel="stylesheet" href="style.css?v=20261031_02">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         if (localStorage.getItem('theme') === 'dark') {
@@ -639,7 +639,7 @@
     <script src="tab-ai.js?v=34"></script>
     <script src="tab-leader.js?v=36"></script>
     <script src="tab-bao-cao.js?v=8"></script>
-    <script src="tab-cham-cong.js?v=17"></script>
+    <script src="tab-cham-cong.js?v=20261031_02"></script>
     <!-- ============ LEADER TAB ============ -->
     <div id="leaderTabContent" class="tab-content hidden">
         <div class="ldr-header-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px; background:var(--card-bg, #1e293b); padding:14px 20px; border-radius:12px; border:1px solid var(--border-color, #334155);">
@@ -1041,7 +1041,12 @@
                 </div>
 
                 <div class="cc-control-section cc-bulk-section">
-                    <div class="cc-control-heading">⚡ Thao tác trên các dòng đang hiển thị</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+                        <div class="cc-control-heading" style="margin-bottom:0;">⚡ Thao tác trên các dòng đang hiển thị</div>
+                        <button type="button" class="cc-btn cc-btn-monthly" onclick="openMonthlyChamCongModal()" style="background:linear-gradient(135deg, #4f46e5, #6366f1); color:#ffffff; font-weight:700; padding:6px 14px; font-size:12px; border:none; border-radius:8px; cursor:pointer; box-shadow:0 3px 10px rgba(79,70,229,0.35); display:inline-flex; align-items:center; gap:6px;">
+                            📊 TỔNG HỢP TT CHẤM CÔNG TRONG THÁNG
+                        </button>
+                    </div>
                     <div class="cc-bulk-row">
                         <div class="cc-view-toggle" aria-label="Chọn kiểu hiển thị">
                             <button id="btnChamCongViewCard" class="cc-view-btn" onclick="toggleChamCongViewMode('card')">📱 Dạng thẻ</button>
@@ -1061,6 +1066,44 @@
                 <span>⏳ Đang kiểm tra kết nối Google Sheets...</span>
             </div>
             <div id="chamCongTableContainer" class="cc-data-container"></div>
+        </div>
+    </div>
+
+    <!-- Modal Tổng Hợp Thông Tin Chấm Công Trong Tháng (B502:O519) -->
+    <div id="chamCongMonthlyModal" class="cc-modal hidden" onclick="if(event.target === this) closeMonthlyChamCongModal()">
+        <div class="cc-modal-content">
+            <div class="cc-modal-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg, #4f46e5, #6366f1); display:flex; align-items:center; justify-content:center; color:#fff; font-size:18px;">
+                        📊
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size:15.5px; font-weight:800; color:inherit;">
+                            Bảng Tổng Hợp Thông Tin Chấm Công Trong Tháng
+                        </h3>
+                        <div style="font-size:11.5px; color:#64748b; margin-top:2px;">
+                            Dữ liệu thực tế từ Sheet: <b>Chi tiết công MN (Tỉnh &amp; HCM)</b> (B502:O519)
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                    <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:inherit;">
+                        <span>Lọc Team:</span>
+                        <select id="monthlyModalTeamFilter" onchange="renderMonthlyModalTable()" class="ldr-select" style="padding:4px 10px; font-size:12px; height:32px; border-radius:7px;">
+                            <option value="ALL">🏢 Tất cả Team (16 NS)</option>
+                            <option value="HCM">🏙️ Team HCM (7 NS)</option>
+                            <option value="TINH">🌄 Team Tỉnh (9 NS)</option>
+                        </select>
+                    </label>
+                    <button type="button" class="cc-btn cc-btn-secondary" onclick="fetchMonthlyChamCongData(true)" style="height:32px; padding:0 12px; font-size:12px; border-radius:7px;" title="Tải lại từ Google Sheets">🔄 Tải lại</button>
+                    <button type="button" class="cc-modal-close" onclick="closeMonthlyChamCongModal()" title="Đóng modal">✕</button>
+                </div>
+            </div>
+            <div id="chamCongMonthlyModalBody" class="cc-modal-body">
+                <div style="text-align:center; padding:40px; color:#64748b; font-style:italic;">
+                    ⏳ Đang tải dữ liệu tổng hợp B502:O519 từ Google Sheets...
+                </div>
+            </div>
         </div>
     </div>
 
