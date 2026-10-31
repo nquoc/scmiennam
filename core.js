@@ -96,19 +96,19 @@ function switchTab(tabName) {
         if (document.getElementById('pivotDaLamWorkspace')) document.getElementById('pivotDaLamWorkspace').classList.remove('hidden');
         if (document.getElementById('aiAnalysisPivotDaLamContainer')) document.getElementById('aiAnalysisPivotDaLamContainer').classList.remove('hidden');
         
-        if (!cacheData['ngaycong']) {
+        if (!cacheData['ngaycong'] || (Array.isArray(cacheData['ngaycong']) && cacheData['ngaycong'].length === 0)) {
             const cachedNC = getFromSessionCache('ngaycong');
-            if (cachedNC) {
+            if (cachedNC && Array.isArray(cachedNC) && cachedNC.length > 0) {
                 cacheData['ngaycong'] = typeof normalizeNgayCongData === 'function' ? normalizeNgayCongData(cachedNC) : cachedNC;
             }
         }
         
-        if (cacheData['hieusuat'] && cacheData['ngaycong']) {
+        if (cacheData['hieusuat'] && cacheData['ngaycong'] && Array.isArray(cacheData['ngaycong']) && cacheData['ngaycong'].length > 0) {
             if (typeof onPivotDaLamDataLoaded === 'function') onPivotDaLamDataLoaded(cacheData['hieusuat']);
         } else {
             const cachedHieuSuat = getFromSessionCache('hieusuat');
             const cachedNgayCong = getFromSessionCache('ngaycong');
-            if (cachedHieuSuat && cachedNgayCong) {
+            if (cachedHieuSuat && cachedNgayCong && Array.isArray(cachedNgayCong) && cachedNgayCong.length > 0) {
                 cacheData['hieusuat'] = cachedHieuSuat;
                 cacheData['ngaycong'] = typeof normalizeNgayCongData === 'function' ? normalizeNgayCongData(cachedNgayCong) : cachedNgayCong;
                 if (typeof onPivotDaLamDataLoaded === 'function') onPivotDaLamDataLoaded(cachedHieuSuat);

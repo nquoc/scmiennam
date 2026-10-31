@@ -597,6 +597,10 @@ async function getDirectAccessToken() {
         throw new Error(data.error_description || 'Không lấy được Token từ Google OAuth2');
     }
 }
+window.SA_CONFIG = SA_CONFIG;
+window.SPREADSHEET_ID = SPREADSHEET_ID;
+window.TARGET_SHEET = TARGET_SHEET;
+window.getDirectAccessToken = getDirectAccessToken;
 
 function initChamCongTab() {
     updateChamCongViewToggleButtons();
