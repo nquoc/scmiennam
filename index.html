@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Check Data Siêu Cấp Vip Pro CRM SC Quốc</title>
+    <link rel="icon" href="hinh-nen-meme-sieu-hai-huoc-anh-che-viral.jpg" type="image/jpeg">
+    <meta property="og:title" content="Check data tồn ở ngoài và SLA và lỗi">
+    <meta property="og:description" content="Tra cứu thông tin xử lý dữ liệu, lỗi, data ở khu vực nằm ngoài sắp chia và tiến độ SLA mới nhất.">
+    <meta property="og:image" content="hinh-nen-meme-sieu-hai-huoc-anh-che-viral.jpg">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="style.css?v=40">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+        }
+    </script>
+
+    <style>
+        /* Dark mode overrides for Leader tab */
+        html.dark-theme .ldr-kpi-card {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        html.dark-theme .ldr-kpi-label {
+            color: #94a3b8 !important;
+        }
+        html.dark-theme .ldr-section {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.3) !important;
+        }
+        html.dark-theme .ldr-section-title {
+            color: #f1f5f9 !important;
+            border-bottom-color: #334155 !important;
+        }
+        html.dark-theme .ldr-chart-box {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+        }
+        html.dark-theme .ldr-chart-label {
+            color: #94a3b8 !important;
+        }
+        html.dark-theme .ldr-table thead tr {
+            background: #0f172a !important;
+        }
+        html.dark-theme .ldr-table th {
+            color: #94a3b8 !important;
+            border-bottom-color: #334155 !important;
+        }
+        html.dark-theme .ldr-table td {
+            color: #e2e8f0 !important;
+            border-bottom-color: #1e293b !important;
+        }
+        html.dark-theme .ldr-table tbody tr:hover {
+            background: #162032 !important;
+        }
+        html.dark-theme .ldr-drill-btn {
+            background: rgba(99,102,241,0.15) !important;
+            border-color: rgba(99,102,241,0.35) !important;
+            color: #a5b4fc !important;
+        }
+        html.dark-theme .ldr-drill-btn:hover {
+            background: rgba(99,102,241,0.25) !important;
+        }
+        html.dark-theme .ldr-formula-note {
+            background: rgba(99,102,241,0.08) !important;
+            border-color: rgba(99,102,241,0.45) !important;
+            color: #cbd5e1 !important;
+        }
+        html.dark-theme .ldr-formula-note code {
+            background: rgba(99,102,241,0.2) !important;
+            color: #a5b4fc !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-container">
+            <h2>CHECK VAR NS COACHER QUỐC</h2>
+            <div class="header-actions">
+                <button id="refreshBtn" class="refresh-btn" onclick="forceRefreshData()" title="Tải lại dữ liệu mới nhất từ Google Sheets">
+                    <span class="refresh-icon">🔄</span>
+                </button>
+                <button id="themeToggle" class="theme-toggle-btn" onclick="toggleTheme()" title="Đổi giao diện Sáng/Tối">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-pivotdalam" onclick="switchTab('pivotdalam')">🧮 Pivot Data Đã làm</button>
+            <button class="tab-btn" id="tab-data" onclick="switchTab('data')">📊 DATA TREO</button>
+            <button class="tab-btn" id="tab-atcdalam" onclick="switchTab('atcdalam')">⚠️ Lỗi Ghi Nhận ATC</button>
+            <button class="tab-btn" id="tab-thongke" onclick="switchTab('thongke')">📅 Data Đổ Theo Ngày</button>
+            <button class="tab-btn" id="tab-kpi" onclick="switchTab('kpi')">📈 Báo cáo KPI</button>
+            <button class="tab-btn" id="tab-leader" onclick="switchTab('leader')">🏆 Deep Analyze</button>
+            <button class="tab-btn" id="tab-baocao" onclick="switchTab('baocao')">🧾 Báo cáo tuần</button>
+            <button class="tab-btn" id="tab-chamcong" onclick="switchTab('chamcong')">📝 Chấm Công SC</button>
+        </div>
+
+        <div id="lastUpdated" style="text-align: center; color: #16a34a; font-weight: 600; margin-top: -10px; margin-bottom: 20px; font-size: 14px;"></div>
+        
+        <div class="search-section">
+            <input type="text" id="searchInput" placeholder="🔍 Nhập từ khóa để tìm kiếm...">
+            
+            <div class="filter-container hidden" id="filtersData" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;">
+                <select id="staffFilter"><option value="">👨‍💼 Nhân sự</option></select>
+                <select id="sourceFilter"><option value="">🏢 Nguồn data</option></select>
+                <select id="provinceFilter"><option value="">🗺️ Tỉnh/Thành</option></select>
+                <select id="wardFilter" disabled><option value="">Xã/Phường (Chọn Tỉnh trước)</option></select>
+                <select id="slaFilter">
+                    <option value="">⏱️ Tất cả SLA</option>
+                    <option value=">=9">🚨 Trễ SLA (>= 9)</option>
+                </select>
+            </div>
+
+            <div class="filter-container hidden" id="filtersATC" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;">
+                <select id="staffFilterATC"><option value="">👨‍💼 Nhân sự</option></select>
+                <select id="errorTypeFilter">
+                    <option value="">⚠️ Tất cả Lỗi</option>
+                    <option value="status">Lỗi Tình trạng (Chưa làm)</option>
+                    <option value="desc">Lỗi Mô tả (<80)</option>
+                    <option value="template">Lỗi Template (Chưa sửa)</option>
+                </select>
+            </div>
+
+            <div class="filter-container hidden" id="filtersThongKe" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;">
+                <select id="provinceFilterThongKe" onchange="applyFiltersThongKe()"><option value="">🗺️ Tất cả Tỉnh/Thành</option></select>
+                <select id="fromDayFilter" onchange="applyFiltersThongKe()"><option value="">📅 Từ ngày</option></select>
+                <select id="toDayFilter" onchange="applyFiltersThongKe()"><option value="">📅 Đến ngày</option></select>
+            </div>
+
+            <div class="filter-container hidden" id="filtersPivotDaLam" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 15px;">
+                <!-- Custom Multiselect for Staff -->
+                <div class="custom-multiselect" id="staffFilterPivotDaLamContainer">
+                    <div class="multiselect-trigger" onclick="toggleMultiselect('staffFilterPivotDaLamContainer')">
+                        <span class="trigger-text">👨‍💼 Nhân sự</span>
+                        <span class="trigger-arrow">▼</span>
+                    </div>
+                    <div class="multiselect-options hidden" id="staffFilterPivotDaLamOptions">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Custom Multiselect for Creator -->
+                <div class="custom-multiselect" id="creatorFilterPivotDaLamContainer">
+                    <div class="multiselect-trigger" onclick="toggleMultiselect('creatorFilterPivotDaLamContainer')">
+                        <span class="trigger-text">✍️ Người tạo</span>
+                        <span class="trigger-arrow">▼</span>
+                    </div>
+                    <div class="multiselect-options hidden" id="creatorFilterPivotDaLamOptions">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Custom Multiselect for Source -->
+                <div class="custom-multiselect" id="sourceFilterPivotDaLamContainer">
+                    <div class="multiselect-trigger" onclick="toggleMultiselect('sourceFilterPivotDaLamContainer')">
+                        <span class="trigger-text">🏢 Nguồn data</span>
+                        <span class="trigger-arrow">▼</span>
+                    </div>
+                    <div class="multiselect-options hidden" id="sourceFilterPivotDaLamOptions">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Custom Multiselect for Impact -->
+                <div class="custom-multiselect" id="impactFilterPivotDaLamContainer">
+                    <div class="multiselect-trigger" onclick="toggleMultiselect('impactFilterPivotDaLamContainer')">
+                        <span class="trigger-text">✨ Impact</span>
+                        <span class="trigger-arrow">▼</span>
+                    </div>
+                    <div class="multiselect-options hidden" id="impactFilterPivotDaLamOptions">
+                        <div class="multiselect-option select-all-option">
+                            <input type="checkbox" id="imp_opt_all" onchange="toggleSelectAll('impactFilterPivotDaLamContainer', 'impactFilterPivotDaLamOptions', this, '✨ Impact')">
+                            <label for="imp_opt_all" style="font-weight: bold; color: #3b82f6;">Chọn tất cả</label>
+                        </div>
+                        <div style="border-bottom: 1px solid #e2e8f0; margin: 4px 0; opacity: 0.5;"></div>
+                        <div class="multiselect-option">
+                            <input type="checkbox" id="imp_opt_1" value="1" onchange="onMultiselectCheckboxChange('impactFilterPivotDaLamContainer', 'impactFilterPivotDaLamOptions', 'imp_opt_all', '✨ Impact')">
+                            <label for="imp_opt_1">Có Impact (1)</label>
+                        </div>
+                        <div class="multiselect-option">
+                            <input type="checkbox" id="imp_opt_0" value="0" onchange="onMultiselectCheckboxChange('impactFilterPivotDaLamContainer', 'impactFilterPivotDaLamOptions', 'imp_opt_all', '✨ Impact')">
+                            <label for="imp_opt_0">Không Impact (0/Trống)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="date-filter-wrapper" style="grid-column: span 2;">
+                    <label for="dateRangeFilterPivotDaLam" class="date-label">📅 Khoảng ngày check-in</label>
+                    <input type="text" id="dateRangeFilterPivotDaLam" placeholder="Chọn khoảng ngày check-in..." class="date-picker-input" readonly>
+                </div>
+            </div>
+            
+            <div class="filter-container hidden" id="filtersKPI" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 15px; justify-content: center;">
+                <div class="custom-multiselect" id="levelFilterKPIContainer">
+                    <div class="multiselect-trigger" onclick="toggleMultiselect('levelFilterKPIContainer')">
+                        <span class="trigger-text">⭐ Cấp độ (Level)</span>
+                        <span class="trigger-arrow">▼</span>
+                    </div>
+                    <div class="multiselect-options hidden" id="levelFilterKPIOptions">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+            
+            <button id="searchBtn" style="width: 100%; padding: 12px; background: #3b82f6; color: white; border: none; border-radius: 8px; margin-top: 15px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(59,130,246,0.2);">🔍 Tìm kiếm / Áp dụng Lọc</button>
+            <button id="btnCopyReport" class="hidden" onclick="copyErrorBaoCao()">Copy báo cáo nhanh</button>
+        </div>
+
+        <div class="status-text">
+            Tìm thấy <span id="recordCount">0</span> kết quả
+            <div id="activeFilters" style="color: #64748b; font-size: 13px; margin-top: 5px; font-weight: 500; text-align: center; word-wrap: break-word;"></div>
+            <br><small>(Chạm vào thẻ để xem chi tiết)</small>
+        </div>
+        
+
+        <div class="dashboard-section hidden" id="dashboardData">
+            <!-- Top Summary KPIs -->
+            <div id="dashTreoSummaryCards" class="treo-summary-grid"></div>
+
+            <div class="treo-cards-grid">
+                <div class="stat-card">
+                    <div class="stat-header"><span>Treo theo Tỉnh/Thành</span> <span class="stat-badge blue">Pending</span></div>
+                    <ul class="stat-list" id="dashPendingProv"></ul>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header"><span>Treo theo Nhân sự</span> <span class="stat-badge blue">Pending</span></div>
+                    <ul class="stat-list" id="dashPendingStaff"></ul>
+                </div>
+                <div class="stat-card stat-card-overdue">
+                    <div class="stat-header"><span>Trễ SLA (≥ 9) Tỉnh/Thành</span> <span class="stat-badge">Tỉnh</span></div>
+                    <ul class="stat-list" id="dashOverdueProv"></ul>
+                </div>
+                <div class="stat-card stat-card-overdue">
+                    <div class="stat-header"><span>Trễ SLA (≥ 9) Nhân sự</span> <span class="stat-badge">Nhân sự</span></div>
+                    <ul class="stat-list" id="dashOverdueStaff"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Analysis Container for Pending/Overdue Cases -->
+        <div class="ai-analysis-container hidden" id="aiAnalysisTreoContainer">
+            <div class="ai-analysis-header">
+                <div class="ai-analysis-title">
+                    <span>🧠 AI Phân Tích Dữ Liệu Treo</span>
+                </div>
+                <div class="ai-analysis-actions">
+                    <span class="ai-analysis-time" id="aiAnalysisTreoTime">Chưa phân tích</span>
+                    <button class="btn-ai-reload" style="background-color: #ef4444; margin-right: 5px;" onclick="clearAITreoAnalysis()">
+                        <span>🗑️ Xóa phân tích</span>
+                    </button>
+                    <button class="btn-ai-reload" onclick="runAITreoAnalysis(true)">
+                        <span>🔄 Tải lại AI</span>
+                    </button>
+                </div>
+            </div>
+            <div class="ai-analysis-body" id="aiAnalysisTreoBody">
+                <!-- Content populated dynamically -->
+            </div>
+        </div>
+
+        <!-- AI Analysis Container for KPI -->
+        <div class="ai-analysis-container hidden" id="aiAnalysisKPIContainer">
+            <div class="ai-analysis-header">
+                <div class="ai-analysis-title">
+                    <span>🧠 AI Phân Tích KPI SC</span>
+                </div>
+                <div class="ai-analysis-actions">
+                    <span class="ai-analysis-time" id="aiAnalysisKPITime">Chưa phân tích</span>
+                    <button class="btn-ai-reload" style="background-color: #ef4444; margin-right: 5px;" onclick="clearAIKPIAnalysis()">
+                        <span>🗑️ Xóa phân tích</span>
+                    </button>
+                    <button class="btn-ai-reload" onclick="runAIKPIAnalysis(true)">
+                        <span>🔄 Phân tích AI / Tải lại</span>
+                    </button>
+                </div>
+            </div>
+            <div class="ai-analysis-body" id="aiAnalysisKPIBody">
+                <!-- Content populated dynamically -->
+            </div>
+        </div>
+
+        <div class="dashboard-section hidden" id="dashboardATC">
+            <div class="stat-card">
+                <div class="stat-header"><span>Lỗi Tình Trạng (Chưa Đóng)</span> <span class="stat-badge">Error</span></div>
+                <ul class="stat-list" id="dashErrStatus"></ul>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><span>Lỗi Mô Tả ngắn hoặc chưa viết (<80)</span> <span class="stat-badge">Error</span></div>
+                <ul class="stat-list" id="dashErrDesc"></ul>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header"><span>Lỗi Template (Chưa sửa Form)</span> <span class="stat-badge">Error</span></div>
+                <ul class="stat-list" id="dashErrTemplate"></ul>
+            </div>
+        </div>
+
+        <div class="view-mode-container hidden" id="viewModeThongKe">
+            <button class="view-toggle-btn active" id="btnViewListThongKe" onclick="toggleViewMode('thongke', 'list')">📋 Bảng số liệu</button>
+            <button class="view-toggle-btn" id="btnViewChartThongKe" onclick="toggleViewMode('thongke', 'chart')">📊 Biểu đồ xu hướng</button>
+        </div>
+
+        <div class="charts-section hidden" id="chartsThongKe">
+            <div class="stat-card" style="padding: 15px;">
+                <h3 style="margin-top:0; font-size:14px; text-align:center; color:#475569;">📊 Tổng số lượng data đổ theo Tỉnh/Thành</h3>
+                <div class="chart-container" style="position: relative; height:280px; width:100%;">
+                    <canvas id="chartThongKeProv"></canvas>
+                </div>
+            </div>
+            <div class="stat-card" style="padding: 15px;">
+                <h3 style="margin-top:0; font-size:14px; text-align:center; color:#475569;">📈 Xu hướng Data đổ theo ngày</h3>
+                <div class="chart-container" style="position: relative; height:280px; width:100%;">
+                    <canvas id="chartThongKeTrend"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pivot Data Da Lam Section -->
+        <div class="pivot-dalam-section hidden" id="pivotDaLamWorkspace">
+            <!-- KPI Cards -->
+            <div class="dashboard-section" id="kpisPivotDaLam" style="margin-bottom: 20px;">
+                <div class="stat-card" style="padding: 15px; border-left: 4px solid #3b82f6;">
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">TỔNG CA HỖ TRỢ</div>
+                    <div id="kpiTotalVisits" class="kpi-val">0</div>
+                </div>
+                <div class="stat-card" style="padding: 15px; border-left: 4px solid #f59e0b;">
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">TB THỜI GIAN HỖ TRỢ / NGÀY</div>
+                    <div id="kpiAverageHours" class="kpi-val">0.0 giờ</div>
+                </div>
+                <div class="stat-card" style="padding: 15px; border-left: 4px solid #8b5cf6;">
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">TB KM / NGÀY</div>
+                    <div id="kpiAverageKM" class="kpi-val">0.00 km</div>
+                </div>
+                <div class="stat-card" style="padding: 15px; border-left: 4px solid #ec4899;">
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">TB CV / NGÀY</div>
+                    <div id="kpiAverageVisits" class="kpi-val">0.00 ca/ngày</div>
+                </div>
+            </div>
+
+            <!-- Charts for Pivot Da Lam -->
+            <div class="charts-section" id="chartsPivotDaLam" style="margin-bottom: 25px;">
+                <div class="stat-card" style="padding: 15px;">
+                    <h3 style="margin-top:0; font-size:14px; text-align:center; color:#475569;">📊 Tổng ATC theo Nhân sự</h3>
+                    <div class="chart-container" style="position: relative; height:280px; width:100%;">
+                        <canvas id="chartPivotDaLamTotalATC"></canvas>
+                    </div>
+                </div>
+                <div class="stat-card" style="padding: 15px;">
+                    <h3 style="margin-top:0; font-size:14px; text-align:center; color:#475569;">📊 TB ATC / Ngày theo Nhân sự</h3>
+                    <div class="chart-container" style="position: relative; height:280px; width:100%;">
+                        <canvas id="chartPivotDaLamAvgATCDay"></canvas>
+                    </div>
+                </div>
+                <div class="stat-card" style="padding: 15px;">
+                    <h3 style="margin-top:0; font-size:14px; text-align:center; color:#475569;">📊 TB Time / Ngày (Giờ) theo Nhân sự</h3>
+                    <div class="chart-container" style="position: relative; height:280px; width:100%;">
+                        <canvas id="chartPivotDaLamAvgTimeDay"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary Performance Table Section -->
+            <div class="pivot-result-wrapper" style="margin-bottom: 30px;">
+                <h3 style="color:#1e293b; font-size:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>📊 Bảng tổng hợp hiệu suất nhân sự theo Ngày công</span>
+                </h3>
+                <div class="table-responsive" style="border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <table id="summaryPerformanceTable" class="pivot-table">
+                        <thead>
+                            <tr>
+                                <th style="text-align: center; width: 50px; min-width: 50px; cursor: pointer;" onclick="sortSummaryTable('originalIndex')">STT <span id="sort_originalIndex"></span></th>
+                                <th style="text-align: left; cursor: pointer;" onclick="sortSummaryTable('fullName')">Tên NS <span id="sort_fullName"></span></th>
+                                <th style="cursor: pointer;" onclick="sortSummaryTable('tCong')">T công <span id="sort_tCong"></span></th>
+                                <th style="cursor: pointer;" onclick="sortSummaryTable('totalATC')">Tổng ATC <span id="sort_totalATC"></span></th>
+                                <th style="cursor: pointer;" onclick="sortSummaryTable('totalImpact')">Tổng Impact <span id="sort_totalImpact"></span></th>
+                                <th style="cursor: pointer;" onclick="sortSummaryTable('totalKM')">Tổng KM <span id="sort_totalKM"></span></th>
+                                <th style="cursor: pointer;" onclick="sortSummaryTable('totalHourSP')">TỔNG GIỜ SP <span id="sort_totalHourSP"></span></th>
+                                <th style="cursor: pointer;" onclick="sortSummaryTable('avgATC')">TB ATC/Ngày <span id="sort_avgATC"></span></th>
+                                <th style="cursor: pointer;" onclick="sortSummaryTable('avgKM')">TB KM/Ngày <span id="sort_avgKM"></span></th>
+                                <th style="cursor: pointer;" onclick="sortSummaryTable('avgHourSP')">TB Time/Ngày <span id="sort_avgHourSP"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryPerformanceBody">
+                            <!-- Populated dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- AI Analysis Container for Pivot Data Da Lam -->
+            <div class="ai-analysis-container hidden" id="aiAnalysisPivotDaLamContainer">
+                <div class="ai-analysis-header">
+                    <div class="ai-analysis-title">
+                        <span id="aiAnalysisPivotDaLamTitleText">🧠 AI Phân Tích Hiệu Suất & Bất Thường</span>
+                    </div>
+                    <div class="ai-analysis-actions">
+                        <span class="ai-analysis-time" id="aiAnalysisPivotDaLamTime">Chưa phân tích</span>
+                        <button class="btn-ai-reload" id="btnSaveAIAnomalyDaLam" style="background: #10b981; display: none;" onclick="saveAIAnomalyReportDaLam()">
+                            <span>💾 Lưu vào Sheets</span>
+                        </button>
+                        <button class="btn-ai-reload" id="btnClearAIPivotDaLam" style="background-color: #ef4444; margin-right: 5px;" onclick="clearAIPivotDaLamAnalysis()">
+                            <span>🗑️ Xóa phân tích</span>
+                        </button>
+                        <button class="btn-ai-reload" id="btnReloadAIPivotDaLam" onclick="runAIPivotDaLamAnalysis(true)">
+                            <span>🔄 Phân tích AI / Tải lại</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="ai-analysis-body" id="aiAnalysisPivotDaLamBody">
+                    <!-- Content populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Pivot Workspace Section for Pivot Da Lam -->
+            <div style="text-align: center; margin-top: 25px; margin-bottom: 15px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+                <button id="btnTogglePivotDaLamWorkspace" class="toggle-workspace-btn" onclick="togglePivotDaLamWorkspace()">
+                    ⚙️ Tùy biến Pivot Table (Ẩn)
+                </button>
+                <button id="btnAIAnomalyAnalysis" class="ai-anomaly-btn" onclick="runAIPivotDaLamAnalysis(true)">
+                    🧠 AI Quét Bất thường
+                </button>
+                <button id="btnAIPerformanceReport" class="ai-perf-btn" onclick="runAIPerformanceReport(true)">
+                    📊 AI Báo cáo Hiệu suất Họp
+                </button>
+            </div>
+            <div class="pivot-container" id="pivotDaLamWorkspaceBuilder" style="margin-top: 20px;">
+                <div class="pivot-sidebar">
+                    <h3 style="margin-top:0; color:#1e293b; font-size:16px; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">📋 Danh sách Trường (đã làm)</h3>
+                    <div class="pivot-instruction">Kéo thả trường vào các ô bên phải hoặc bấm <strong>+H</strong> (Hàng) / <strong>+C</strong> (Cột) để thêm.</div>
+                    <div class="pivot-fields" id="pivotDaLamFieldsList">
+                        <!-- Fields list populated by JS -->
+                    </div>
+                </div>
+                <div class="pivot-main">
+                    <div class="pivot-drop-zones">
+                        <div class="pivot-zone-wrapper">
+                            <span class="pivot-zone-label">↕️ Hàng (Rows)</span>
+                            <div class="pivot-dropzone" id="rowDropZonePivotDaLam" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDropPivotDaLam(event, 'row')">
+                                <div class="placeholder-text">Kéo trường làm hàng dọc ở đây</div>
+                            </div>
+                        </div>
+                        <div class="pivot-zone-wrapper">
+                            <span class="pivot-zone-label">↔️ Cột (Columns)</span>
+                            <div class="pivot-dropzone" id="colDropZonePivotDaLam" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDropPivotDaLam(event, 'col')">
+                                <div class="placeholder-text">Kéo trường làm cột ngang ở đây</div>
+                            </div>
+                        </div>
+                        <div class="pivot-zone-wrapper">
+                            <span class="pivot-zone-label">🔢 Giá trị (Values)</span>
+                            <div class="pivot-value-config">
+                                <div class="pivot-dropzone" id="valDropZonePivotDaLam" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDropPivotDaLam(event, 'val')">
+                                    <div class="placeholder-text">Kéo trường tính toán ở đây</div>
+                                </div>
+                                <select id="pivotDaLamAggrType" onchange="calculatePivotDaLam()">
+                                    <option value="count">Đếm số dòng (Count)</option>
+                                    <option value="sum">Cộng tổng (Sum - cho cột số)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pivot-actions">
+                        <button class="btn-clear" onclick="clearPivotDaLamSettings()">🧹 Xóa cấu hình</button>
+                        <button class="btn-export" id="btnExportPivotDaLam" onclick="exportPivotDaLamToCSV()">📥 Xuất Excel (CSV)</button>
+                    </div>
+                    <div class="pivot-result-wrapper">
+                        <h3 style="color:#1e293b; font-size:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>📊 Kết quả Pivot Table</span>
+                            <span id="pivotDaLamInfo" style="font-size:13px; color:#64748b; font-weight:normal;"></span>
+                        </h3>
+                        <div class="table-responsive" style="border: 1px solid #e2e8f0; border-radius: 8px;">
+                            <table id="pivotDaLamResultTable" class="pivot-table">
+                                <thead id="pivotDaLamTableHead"></thead>
+                                <tbody id="pivotDaLamTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading">⏳ CHỜ XÍU ĐANG KẾT NỐI VỚI DATABASE...</div>
+
+        <div class="table-responsive">
+            <table id="dataTable" style="display: none;">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Toggle Button for Collapsible Pivot Table -->
+        <div id="togglePivotWorkspaceContainer" class="hidden" style="text-align: center; margin-top: 25px; margin-bottom: 15px;">
+            <button id="btnTogglePivotWorkspace" class="toggle-workspace-btn collapsed" onclick="togglePivotWorkspace()">
+                ⚙️ Tùy biến Pivot Table (Hiện)
+            </button>
+        </div>
+
+        <!-- Relocated Pivot Workspace Section -->
+        <div class="pivot-section hidden" id="pivotWorkspace">
+            <div class="pivot-container">
+                <div class="pivot-sidebar">
+                    <h3 style="margin-top:0; color:#1e293b; font-size:16px; border-bottom:2px solid #e2e8f0; padding-bottom:8px;">📋 Danh sách Trường (data)</h3>
+                    <div class="pivot-instruction">Kéo thả trường vào các ô bên phải hoặc bấm <strong>+H</strong> (Hàng) / <strong>+C</strong> (Cột) để thêm.</div>
+                    <div class="pivot-fields" id="pivotFieldsList">
+                        <!-- Fields list populated by JS -->
+                    </div>
+                </div>
+                <div class="pivot-main">
+                    <div class="pivot-drop-zones">
+                        <div class="pivot-zone-wrapper">
+                            <span class="pivot-zone-label">↕️ Hàng (Rows)</span>
+                            <div class="pivot-dropzone" id="rowDropZone" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'row')">
+                                <div class="placeholder-text">Kéo trường làm hàng dọc ở đây</div>
+                            </div>
+                        </div>
+                        <div class="pivot-zone-wrapper">
+                            <span class="pivot-zone-label">↔️ Cột (Columns)</span>
+                            <div class="pivot-dropzone" id="colDropZone" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'col')">
+                                <div class="placeholder-text">Kéo trường làm cột ngang ở đây</div>
+                            </div>
+                        </div>
+                        <div class="pivot-zone-wrapper">
+                            <span class="pivot-zone-label">🔢 Giá trị (Values)</span>
+                            <div class="pivot-value-config">
+                                <div class="pivot-dropzone" id="valDropZone" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)" ondrop="handleDrop(event, 'val')">
+                                    <div class="placeholder-text">Kéo trường tính toán ở đây</div>
+                                </div>
+                                <select id="pivotAggrType" onchange="calculatePivot()">
+                                    <option value="count">Đếm số dòng (Count)</option>
+                                    <option value="sum">Cộng tổng (Sum - cho cột số)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pivot-actions">
+                        <button class="btn-clear" onclick="clearPivotSettings()">🧹 Xóa cấu hình</button>
+                        <button class="btn-export" id="btnExportPivot" onclick="exportPivotToCSV()">📥 Xuất Excel (CSV)</button>
+                    </div>
+                    <div class="pivot-result-wrapper">
+                        <h3 style="color:#1e293b; font-size:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>📊 Kết quả Pivot Table</span>
+                            <span id="pivotCountInfo" style="font-size:13px; color:#64748b; font-weight:normal;"></span>
+                        </h3>
+                        <div class="table-responsive" style="border: 1px solid #e2e8f0; border-radius: 8px;">
+                            <table id="pivotResultTable" class="pivot-table">
+                                <thead id="pivotTableHead"></thead>
+                                <tbody id="pivotTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="detailModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h3 style="margin-top: 0; color: #1f2937; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; font-size: 18px;">Thông tin chi tiết</h3>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Pivot List Modal -->
+    <div id="pivotListModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="modal-close" onclick="closePivotListModal()">&times;</span>
+            <h3 id="pivotListModalTitle" style="margin-top: 0; color: #1f2937; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; font-size: 18px;">Danh sách chi tiết</h3>
+            <div id="pivotListModalBody" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px; max-height: 60vh; overflow-y: auto; padding-right: 5px;"></div>
+        </div>
+    </div>
+
+    <!-- AI Anomaly Report Modal -->
+    <div id="aiAnomalyModal" class="modal-overlay">
+        <div class="modal-content" style="max-width: 700px; width: 90%;">
+            <span class="modal-close" onclick="closeAIAnomalyModal()">&times;</span>
+            <h3 style="margin-top: 0; color: #8b5cf6; border-bottom: 2px solid #8b5cf6; padding-bottom: 10px; font-size: 18px; display: flex; align-items: center; gap: 8px;">
+                <span>🧠 AI Phân Tích Bất Thường Nhân Sự</span>
+            </h3>
+            <div id="aiAnomalyModalBody" style="margin-top: 15px; max-height: 65vh; overflow-y: auto; padding-right: 5px; font-size: 14px; line-height: 1.6; color: #1e293b;">
+                <!-- Content or loading spinner populated by JS -->
+            </div>
+            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                <button id="btnSaveAIAnomaly" style="display: none; padding: 10px 18px; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: opacity 0.2s;" onclick="saveAIAnomalyReport()">💾 Lưu vào Sheets</button>
+                <button style="padding: 10px 18px; background: #64748b; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;" onclick="closeAIAnomalyModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Floating Widget -->
+    <div id="aiChatWidget" class="ai-chat-widget">
+        <button id="aiChatToggle" class="ai-chat-toggle" onclick="toggleAIChat()" title="Hỏi trợ lý AI">
+            <span class="ai-icon">✦</span>
+        </button>
+        <div id="aiChatContainer" class="ai-chat-container hidden">
+            <div class="ai-chat-header">
+                <div class="ai-chat-title-wrapper">
+                    <span class="ai-chat-spark">✦</span>
+                    <div class="ai-chat-title-info">
+                        <span class="ai-chat-title">Trợ lý AI Quốc</span>
+                        <span class="ai-chat-status">Hệ thống AI • Trực tuyến</span>
+                    </div>
+                </div>
+                <div class="ai-chat-header-actions">
+                    <button class="ai-chat-clear-btn" onclick="clearAIChat()" title="Xóa chat cũ, bắt đầu chat mới">🗑️</button>
+                    <button class="ai-chat-close" onclick="toggleAIChat()">&times;</button>
+                </div>
+            </div>
+            <div id="aiChatMessages" class="ai-chat-messages">
+                <div class="ai-message bot">
+                    <div class="ai-message-content">
+                        Xin chào anh Quốc! Em là trợ lý AI thông minh. Em đã đọc toàn bộ dữ liệu hiện tại của anh (Tra cứu Retailer, Lỗi ATC và hiệu suất Ngày công). Anh có câu hỏi gì cần em giải đáp về số liệu không ạ?
+                    </div>
+                    <div class="ai-message-time">Vừa xong</div>
+                </div>
+            </div>
+            <div id="aiChatTyping" class="ai-chat-typing hidden">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <div class="ai-chat-input-area">
+                <input type="text" id="aiChatInput" placeholder="Hỏi AI về số liệu..." onkeypress="handleAIChatKeypress(event)">
+                <button id="aiChatSend" onclick="sendAIChatMessage()">➔</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="utils.js?v=24"></script>
+    <script src="core.js?v=28"></script>
+    <script src="tab-tra-cuu.js?v=21"></script>
+    <script src="tab-pivot-treo.js?v=22"></script>
+    <script src="tab-pivot-da-lam.js?v=38"></script>
+    <script src="tab-thong-ke.js?v=22"></script>
+    <script src="tab-ai.js?v=34"></script>
+    <script src="tab-leader.js?v=36"></script>
+    <script src="tab-bao-cao.js?v=8"></script>
+    <script src="tab-cham-cong.js?v=17"></script>
+    <!-- ============ LEADER TAB ============ -->
+    <div id="leaderTabContent" class="tab-content hidden">
+        <div class="ldr-header-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px; background:var(--card-bg, #1e293b); padding:14px 20px; border-radius:12px; border:1px solid var(--border-color, #334155);">
+            <div style="font-size:16px; font-weight:700; color:inherit; display:flex; align-items:center; gap:8px;">
+                🏆 Phân tích Chuyên sâu (Deep Analyze)
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label for="leaderWeekFilter" style="font-size:13px; font-weight:600; color:inherit;">📅 Lọc theo Tuần:</label>
+                    <select id="leaderWeekFilter" class="ldr-select" onchange="initLeaderTab()" style="padding:6px 14px; border-radius:8px; font-size:13px; font-weight:600; min-width:180px;">
+                        <option value="ALL">-- Tất cả các tuần --</option>
+                    </select>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label for="leaderStaffFilter" style="font-size:13px; font-weight:600; color:inherit;">👨‍💼 Lọc theo Nhân sự:</label>
+                    <select id="leaderStaffFilter" class="ldr-select" onchange="initLeaderTab()" style="padding:6px 14px; border-radius:8px; font-size:13px; font-weight:600; min-width:180px;">
+                        <option value="ALL">-- Tất cả nhân sự --</option>
+                    </select>
+                </div>
+                <button id="btnExportZaloReport" onclick="exportZaloReport()" style="background:#0068ff; color:#ffffff; border:none; font-size:13px; font-weight:600; padding:7px 16px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#0052cc'" onmouseout="this.style.background='#0068ff'">
+                    💬 Xuất Báo Cáo Zalo (1-Click)
+                </button>
+
+            </div>
+        </div>
+
+        <div id="leaderKPICards"></div>
+
+
+
+        <!-- Section 4: Khách hàng & Ngành hàng -->
+        <div class="ldr-section">
+            <h3 class="ldr-section-title">🏪 Khách hàng &amp; Ngành hàng</h3>
+            <div class="ldr-chart-row">
+                <div class="ldr-chart-box">
+                    <div class="ldr-chart-label" style="color: inherit;">Phân phối theo Ngành hàng</div>
+                    <canvas id="leaderIndustryChart"></canvas>
+                </div>
+                <div class="ldr-chart-box">
+                    <div class="ldr-chart-label" style="color: inherit;">Phân phối theo Gói hợp đồng</div>
+                    <canvas id="leaderContractChart"></canvas>
+                </div>
+            </div>
+            <div class="ldr-chart-label" style="text-align:left;margin-bottom:8px;font-weight:700">Top Retailer được viếng thăm nhiều nhất (Revisit Rate)</div>
+            <div id="leaderRevisitTable"></div>
+        </div>
+
+        <!-- Section 5: Chất lượng công việc -->
+        <div class="ldr-section">
+            <h3 class="ldr-section-title">🎯 Chất lượng công việc theo SC</h3>
+            <div class="ldr-chart-box" style="margin-bottom:18px">
+                <div class="ldr-chart-label" style="color: inherit;">So sánh Tổng điểm / Impact / Addon theo SC</div>
+                <canvas id="leaderQualityChart" style="max-height:280px"></canvas>
+            </div>
+            <div class="ldr-chart-box">
+                <div class="ldr-chart-label" style="color: inherit;">Xu hướng số ca theo ngày trong kỳ (Trend)</div>
+                <canvas id="leaderTrendChart" style="max-height:220px"></canvas>
+            </div>
+        </div>
+
+        <!-- Section 6: Nguồn data -->
+        <div class="ldr-section">
+            <h3 class="ldr-section-title">📦 Nguồn data &amp; Phân phối</h3>
+            <div class="ldr-chart-row">
+                <div class="ldr-chart-box">
+                    <div class="ldr-chart-label" style="color: inherit;">Phân phối theo Nguồn data</div>
+                    <canvas id="leaderSourceChart"></canvas>
+                </div>
+                <div style="display:flex;flex-direction:column;justify-content:center">
+                    <div class="ldr-chart-label" style="text-align:left;margin-bottom:8px;font-weight:700">Tỉ lệ Impact theo Nguồn data</div>
+                    <div id="leaderSourceTable"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Multi-Metric Leaderboard -->
+        <div class="ldr-section">
+            <h3 class="ldr-section-title">🏆 Bảng xếp hạng đa chiều (Multi-Metric Leaderboard)</h3>
+            <div class="ldr-formula-note" style="background: rgba(99,102,241,0.04); border: 1px dashed rgba(99,102,241,0.3); border-radius: 12px; padding: 15px; margin-bottom: 18px; font-size: 13px; color: #475569; line-height: 1.6;">
+                <strong>💡 Cách tính Điểm Tổng Hợp (Điểm TH) đánh giá toàn diện SC:</strong>
+                <ul style="margin: 6px 0 0 18px; padding: 0;">
+                    <li>Quy đổi 4 chỉ số cốt lõi (<strong>Số ca, Impact, Addon, Tổng điểm</strong>) của từng SC về thang điểm chuẩn hóa từ <strong>0 đến 100</strong> (SC cao nhất đội nhận 100đ, thấp nhất nhận 0đ).</li>
+                    <li><strong>Công thức tính Điểm TH:</strong> <code style="background: rgba(99,102,241,0.1); padding: 2px 6px; border-radius: 4px; font-family: inherit; font-weight: bold; color: #4f46e5;">Điểm TH = (Điểm Số ca + Điểm Impact + Điểm Addon + Điểm Chất lượng) / 4</code>.</li>
+                    <li>Hệ thống xếp hạng tự động dựa trên Điểm TH (Hạng 1: 🥇, Hạng 2: 🥈, Hạng 3: 🥉). Giúp đánh giá thực chất và khách quan năng lực làm việc.</li>
+                </ul>
+            </div>
+            <div id="leaderboardTable"></div>
+        </div>
+
+        <!-- Section 8: Fraud Detection -->
+        <div class="ldr-section">
+            <h3 class="ldr-section-title">🚨 Phát hiện gian lận — % ATC tự tạo</h3>
+            <p style="font-size:13px;color:#64748b;margin-bottom:14px">
+                So sánh <b>Người tạo</b> vs <b>Người xử lý</b> trên từng ATC.
+                <span class="ldr-badge badge-green">✅ 0–20%</span> Bình thường &nbsp;
+                <span class="ldr-badge badge-yellow">⚠️ 20–50%</span> Cần để ý &nbsp;
+                <span class="ldr-badge badge-red">🚨 &gt;50%</span> Nghi vấn gian lận
+            </p>
+            <div id="leaderFraudTable"></div>
+        </div>
+
+        <!-- Section 14: Phân tích tỷ lệ Addon theo SC -->
+        <div class="ldr-section">
+            <h3 class="ldr-section-title">🔌 Phân tích tỷ lệ Addon theo SC</h3>
+            <p style="font-size:13px;color:#64748b;margin-bottom:14px">
+                Thống kê số lượng Addon đạt được của từng SC. Mỗi Addon đóng góp <b>5 điểm</b> vào chỉ số Điểm Addon.
+                <br>
+                <i>Các loại công việc tính là Addon: Kích hoạt payment, Giới thiệu Kship/Lending/Hotellink, Mua phần cứng, HDDT/CKS, Chuyển lead tái ký/ký mới.</i>
+            </p>
+            <div id="leaderAddonTable"></div>
+            
+            <div class="ldr-chart-row" style="margin-top:20px;">
+                <div class="ldr-chart-box">
+                    <div class="ldr-chart-label" style="color: inherit;">Phân bổ các loại Addon toàn đội</div>
+                    <canvas id="leaderAddonTypeChart"></canvas>
+                </div>
+                <div class="ldr-chart-box" style="padding:15px">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px">
+                        <div class="ldr-chart-label" style="margin:0; font-weight:700; color:inherit;">📋 Chi tiết các ca có Addon</div>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <select id="leaderAddonStaffSelect" class="ldr-select" onchange="renderLeaderAddonDetails()">
+                                <option value="">-- Tất cả nhân sự --</option>
+                            </select>
+                            <select id="leaderAddonTypeSelect" class="ldr-select" onchange="renderLeaderAddonDetails()">
+                                <option value="">-- Tất cả loại Addon --</option>
+                                <option value="Kích hoạt payment thành công">Payment thành công</option>
+                                <option value="Giới thiệu Kship">Giới thiệu Kship</option>
+                                <option value="Giới thiệu Lending">Giới thiệu Lending</option>
+                                <option value="Giới thiệu nâng gói">Nâng gói</option>
+                                <option value="Mua phần cứng">Mua phần cứng</option>
+                                <option value="Giới thiệu Thêm kho/thêm chi nhánh">Thêm kho/chi nhánh</option>
+                                <option value="Giới thiệu Hotellink">Hotellink</option>
+                                <option value="Hướng dẫn KH HDDT/CKS thành công">HDDT/CKS</option>
+                                <option value="Chuyển lead tái ký">Lead tái ký</option>
+                                <option value="Chuyển lead ký mới">Lead ký mới</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="leaderAddonDetailTableContainer">
+                        <p style="text-align:center; color:#64748b; font-style:italic; padding:15px">Vui lòng chọn nhân sự hoặc loại Addon ở trên để xem chi tiết các ca.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 15: Tỷ trọng act theo thời gian hỗ trợ của nhân sự -->
+        <div class="ldr-section">
+            <h3 class="ldr-section-title">⏱️ Tỷ trọng act theo thời gian hỗ trợ của nhân sự</h3>
+            <p style="font-size:13px;color:#64748b;margin-bottom:14px">
+                Bảng phân tích tỷ trọng và số lượng ca hỗ trợ của từng SC theo các khoảng thời gian thực hiện. Ô giá trị hiển thị <b>[Số ca / Tỷ trọng %]</b> và được tô màu theo 3 cấp độ (Ít nhất, Bình thường, Cao nhất).
+            </p>
+            <div id="leaderSupportDurationTable"></div>
+        </div>
+
+        <!-- Section 16: Phân tích tỷ trọng loại công việc trong các ca có Impact -->
+        <div class="ldr-section">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+                <h3 class="ldr-section-title" style="margin:0;">⚡ Phân tích tỷ trọng loại công việc trong các ca có Impact (Impact = 1)</h3>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <label for="section16WeekFilter" style="font-size:12.5px; font-weight:600; color:inherit;">📅 Tuần:</label>
+                        <select id="section16WeekFilter" class="ldr-select" onchange="onSection16FilterChange()" style="padding:5px 12px; border-radius:8px; font-size:12.5px; font-weight:600; min-width:160px;">
+                            <option value="ALL">-- Tất cả các tuần --</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <label for="section16StaffFilter" style="font-size:12.5px; font-weight:600; color:inherit;">👨‍💼 Nhân sự:</label>
+                        <select id="section16StaffFilter" class="ldr-select" onchange="onSection16FilterChange()" style="padding:5px 12px; border-radius:8px; font-size:12.5px; font-weight:600; min-width:160px;">
+                            <option value="ALL">-- Tất cả nhân sự --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <p style="font-size:13px;color:#64748b;margin-bottom:14px">
+                Thống kê tần suất và tỷ trọng phần trăm (%) của từng loại công việc trong tổng số các ca hỗ trợ đạt điểm Impact. Các ca gộp nhiều công việc (<code>|##|</code>) được tách biệt để tính đúng tỷ trọng.
+            </p>
+            <div id="leaderImpactWorkTypeKPICards" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:18px;"></div>
+            
+            <div class="ldr-chart-row" style="margin-top:15px;">
+                <div class="ldr-chart-box">
+                    <div class="ldr-chart-label" style="color: inherit;">Biểu đồ tỷ trọng công việc trong ca Impact</div>
+                    <canvas id="leaderImpactWorkTypeChart"></canvas>
+                </div>
+                <div class="ldr-chart-box" style="padding:15px">
+                    <div class="ldr-chart-label" style="margin-bottom:12px; font-weight:700; color:inherit;">📋 Danh sách loại công việc &amp; Tỷ trọng %</div>
+                    <div id="leaderImpactWorkTypeTable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ============ END LEADER TAB ============ -->
+
+    <!-- ============ TAB CHẤM CÔNG ============ -->
+
+    <!-- ============ WEEKLY REPORT TAB ============ -->
+    <div id="weeklyReportContent" class="tab-content hidden wr-page">
+        <style id="weeklyReportExportStyles">
+            .wr-document{max-width:1100px;margin:0 auto;background:#fff;color:#172033;padding:34px 42px;border-radius:14px;box-shadow:0 8px 30px rgba(15,23,42,.08);font-family:Arial,"Segoe UI",sans-serif;line-height:1.55}
+            .wr-doc-title{text-align:center;font-size:27px;font-weight:800;color:#17365d;letter-spacing:.2px}.wr-doc-subtitle{text-align:center;color:#64748b;margin:4px 0 24px;font-size:13px}
+            .wr-document section{margin:0 0 26px}.wr-document h2{font-size:19px;color:#17365d;border-bottom:2px solid #d7e5f2;padding-bottom:7px;margin:22px 0 12px;text-align:left!important}.wr-document h3{font-size:15px;color:#2f5597;margin:16px 0 8px;text-align:left!important}.wr-document h4{font-size:13px;color:#475569;margin:8px 0;text-align:left!important}
+            .wr-document p{margin:7px 0}.wr-document ul,.wr-document ol{margin:7px 0 10px 22px;padding:0}.wr-document li{margin:4px 0}.wr-note{background:#eef6fb;border-left:4px solid #5b9bd5;padding:8px 10px;border-radius:6px}
+            .wr-table-wrap{overflow-x:auto;margin:10px 0 14px}.wr-table{width:100%;border-collapse:collapse;font-size:12.5px}.wr-table th,.wr-table td{border:1px solid #c9d4df;padding:7px 8px;text-align:center;vertical-align:middle}.wr-table th{background:#d9eaf7;color:#17365d;font-weight:700}.wr-table td:first-child{text-align:left}.wr-summary-table td:nth-child(odd){font-weight:700;background:#edf4fb;color:#17365d}.wr-two-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}.wr-generated-note{margin-top:30px;padding-top:10px;border-top:1px solid #e2e8f0;color:#94a3b8;text-align:center;font-size:11px}
+
+            /* BẢNG DASHBOARD GỐC — native HTML, tự đổi sáng/tối và KHÔNG kéo ngang trên desktop */
+            .wr-document{--wr-card:#ffffff;--wr-head:#e8eef7;--wr-cell:#ffffff;--wr-border:#cbd5e1;--wr-text:#1e293b;--wr-muted:#475569;--wr-total:#e2e8f0;--wr-hover:#f8fafc}
+            html.dark-theme .wr-document{background:#1e293b;color:#e2e8f0;border-color:#334155;--wr-card:#0f172a;--wr-head:#0b0f19;--wr-cell:#0f172a;--wr-border:#334155;--wr-text:#e2e8f0;--wr-muted:#94a3b8;--wr-total:#162032;--wr-hover:#1e293b}
+            html.dark-theme .wr-doc-title{color:#93c5fd} html.dark-theme .wr-doc-subtitle{color:#94a3b8}
+            html.dark-theme .wr-document h2{color:#bfdbfe;border-bottom-color:#334155} html.dark-theme .wr-document h3{color:#93c5fd} html.dark-theme .wr-document h4{color:#cbd5e1}
+            html.dark-theme .wr-note{background:#162032;border-left-color:#3b82f6;color:#cbd5e1}
+            html.dark-theme .wr-summary-table td{border-color:#334155;color:#e2e8f0} html.dark-theme .wr-summary-table td:nth-child(odd){background:#0f172a;color:#93c5fd}
+            .wr-native-card{margin:12px 0 18px;background:var(--wr-card);border:1px solid var(--wr-border);border-radius:9px;overflow:hidden;color:var(--wr-text);box-shadow:0 2px 8px rgba(15,23,42,.10)}
+            .wr-native-title{padding:10px 13px 7px;font-weight:800;color:var(--wr-text);font-size:13px;background:var(--wr-card)}.wr-native-subtitle{padding:0 13px 8px;font-size:11px;color:var(--wr-muted)}
+            .wr-native-scroll{overflow-x:auto;width:100%}.wr-native-table{width:100%;max-width:100%;border-collapse:collapse;white-space:nowrap;font-size:10px;color:var(--wr-text);background:var(--wr-card)}
+            .wr-native-table th{background:var(--wr-head);color:var(--wr-muted);text-transform:uppercase;font-size:9px;line-height:1.2;letter-spacing:0;font-weight:700;padding:6px 4px;border:1px solid var(--wr-border);text-align:center;white-space:nowrap}
+            .wr-native-table td{padding:6px 4px;border:1px solid var(--wr-border);text-align:center;background:var(--wr-cell);color:var(--wr-text);font-variant-numeric:tabular-nums;white-space:nowrap}.wr-native-table td.wr-name{text-align:left;font-weight:700;color:var(--wr-text);white-space:nowrap}
+            .wr-native-table tbody tr:hover td{background:var(--wr-hover)}.wr-native-total td{background:var(--wr-total)!important;color:var(--wr-text)!important;font-weight:800;border-top:2px solid var(--wr-border)!important}
+            .wr-kpi-native{font-size:9px}.wr-kpi-native th{font-size:8px;padding:5px 1px;letter-spacing:-0.2px}.wr-kpi-native td{padding:5px 1.5px;white-space:nowrap;font-size:8.5px;letter-spacing:-0.2px}.wr-kpi-native td.wr-name{white-space:normal;text-align:left}.wr-kpi-native th:nth-child(1),.wr-kpi-native td:nth-child(1){width:15%}.wr-kpi-native th:nth-child(2),.wr-kpi-native td:nth-child(2){width:4.5%}
+            .wr-performance-native th:nth-child(2),.wr-performance-native td:nth-child(2){width:16%}.wr-incoming-native{font-size:9px}.wr-incoming-native th,.wr-incoming-native td{padding:5px 2px}.wr-incoming-native th:first-child,.wr-incoming-native td:first-child{width:15%}.wr-duration-native th:first-child,.wr-duration-native td:first-child{width:16%}
+            .wr-kpi-good{background:#d1fae5!important;color:#047857!important;font-weight:800}.wr-kpi-medium{background:#fef3c7!important;color:#b45309!important;font-weight:800}.wr-kpi-bad{background:#fee2e2!important;color:#b91c1c!important;font-weight:800}
+            .wr-perf-good{background:#d1fae5!important;color:#047857!important;font-weight:800}.wr-perf-bad{background:#fee2e2!important;color:#b91c1c!important;font-weight:800}.wr-perf-warn{background:#fef3c7!important;color:#b45309!important;font-weight:800}.wr-total-accent{color:#dc2626!important;font-weight:800!important}.wr-strong{font-weight:800!important}.wr-incoming-avg{color:#2563eb!important;font-weight:800!important}
+            html.dark-theme .wr-kpi-good,html.dark-theme .wr-perf-good{background:rgba(16,185,129,.22)!important;color:#34d399!important} html.dark-theme .wr-kpi-medium,html.dark-theme .wr-perf-warn{background:rgba(245,158,11,.22)!important;color:#fbbf24!important} html.dark-theme .wr-kpi-bad,html.dark-theme .wr-perf-bad{background:rgba(239,68,68,.20)!important;color:#f87171!important}
+            .wr-two-native{display:grid;grid-template-columns:1fr 1fr;gap:14px}.wr-two-native .wr-native-card{margin-top:7px}.wr-compact-native th:nth-child(2),.wr-compact-native td:nth-child(2){width:110px}.wr-backlog-grand{margin:-6px 0 18px;padding:10px 12px;background:#eef2f7;border:1px solid #cbd5e1;border-radius:8px;color:#0f172a;font-size:12px} html.dark-theme .wr-backlog-grand{background:#111827;border-color:#334155;color:#f8fafc}
+            .wr-native-legend,.wr-duration-legend{padding:9px 12px;color:var(--wr-muted);font-size:10px;background:var(--wr-head);border-bottom:1px solid var(--wr-border)}.wr-native-badge,.wr-duration-chip{display:inline-block;border-radius:999px;padding:2px 8px;font-weight:800;font-size:10px;white-space:nowrap}.wr-badge-green{background:#d1fae5;color:#047857}.wr-badge-yellow{background:#fef3c7;color:#b45309}.wr-badge-red{background:#fee2e2;color:#b91c1c}.wr-drill-pill{display:inline-block;border:1px solid #818cf8;background:#eef2ff;color:#4338ca;padding:3px 8px;border-radius:7px;font-size:10px}
+            .wr-duration-chip{border-radius:4px;margin:0 3px}.wr-duration-low{background:#dbeafe!important;color:#1d4ed8!important}.wr-duration-mid{background:#93c5fd!important;color:#1e3a8a!important;font-weight:700}.wr-duration-high{background:#2563eb!important;color:#fff!important;font-weight:800}
+            .wr-custom-section{margin:0 0 26px}
+            .wr-custom-content{font-size:13px;line-height:1.6;color:inherit}
+            .wr-custom-content img{max-width:100%;height:auto;border-radius:8px;margin:12px 0;display:block;box-shadow:0 2px 8px rgba(15,23,42,.12)}
+            .wr-custom-content table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
+            .wr-custom-content th,.wr-custom-content td{border:1px solid var(--wr-border,#cbd5e1);padding:7px 10px;text-align:left;vertical-align:top}
+            .wr-custom-content th{background:var(--wr-head,#e8eef7);font-weight:700;color:var(--wr-text,#17365d)}
+            .wr-custom-content p{margin:6px 0}
+            .wr-custom-content ul,.wr-custom-content ol{margin:6px 0 10px 22px;padding:0}
+            html.dark-theme .wr-custom-content table th{background:#0f172a;color:#93c5fd;border-color:#334155} html.dark-theme .wr-custom-content table td{border-color:#334155;color:#e2e8f0}
+            @media(max-width:800px){.wr-two-native{grid-template-columns:1fr}.wr-native-scroll{overflow-x:auto}.wr-native-table{min-width:850px;font-size:9px}.wr-kpi-native{min-width:1100px}.wr-native-table th,.wr-native-table td{padding:5px 3px}}
+            @media(max-width:800px){.wr-document{padding:20px 16px}.wr-two-cols{grid-template-columns:1fr}.wr-doc-title{font-size:21px}.wr-table{font-size:11px}}
+            @media print{body{background:#fff!important}.wr-document{box-shadow:none!important;max-width:none;padding:0}.wr-document section{break-inside:auto}.wr-table{page-break-inside:auto}.wr-table tr{page-break-inside:avoid}}
+        </style>
+
+        <div class="wr-toolbar-card">
+            <div class="wr-toolbar-title">
+                <div><b>🧾 BÁO CÁO TUẦN TỰ ĐỘNG</b><small>Lấy số trực tiếp từ Dashboard → dựng lại đúng bảng gốc bằng HTML → copy sang Atlassian</small></div>
+                <div id="wrSnapshotInfo" class="wr-snapshot-info"></div>
+            </div>
+
+            <div class="wr-controls-grid">
+                <label><span>📅 Từ ngày</span><input type="date" id="wrFromDate"></label>
+                <label><span>📅 Đến ngày</span><input type="date" id="wrToDate"></label>
+                <label><span>🏠 Case đổi TT/địa chỉ</span><input type="number" min="0" id="wrAddressTotal" placeholder="VD: 29"></label>
+                <label><span>✅ Đã đổi trên OTP</span><input type="number" min="0" id="wrAddressDone" placeholder="VD: 29"></label>
+            </div>
+
+            <details class="wr-manual-details" id="wrManualDetails" open>
+                <summary>✍️ Nội dung bổ sung &amp; Mục tùy chỉnh (Tự đặt tiêu đề, viết nội dung, chèn ảnh, tạo bảng)</summary>
+                
+                <div class="wr-custom-sections-header" style="display:flex; justify-content:space-between; align-items:center; margin:14px 0 10px; flex-wrap:wrap; gap:10px;">
+                    <div style="font-weight:700; font-size:13.5px; color:inherit; display:flex; align-items:center; gap:6px;">
+                        <span>🎨 Các mục tùy chỉnh</span>
+                        <span style="font-size:11.5px; font-weight:normal; color:#64748b;">(Tự do đặt tên mục, viết văn bản, chèn/paste ảnh clipboard, tạo bảng)</span>
+                    </div>
+                    <button type="button" class="wr-btn wr-btn-blue" onclick="addWeeklyReportCustomSection()" style="padding:6px 12px; font-size:12px;">
+                        ➕ Thêm mục tùy chỉnh
+                    </button>
+                </div>
+
+                <div id="wrCustomSectionsContainer" class="wr-custom-sections-container">
+                    <!-- Dynamic custom section cards populated by JS -->
+                </div>
+
+                <div style="font-weight:700; font-size:13px; color:inherit; margin:16px 0 8px;">📝 Các ghi chú nhanh khác:</div>
+                <div class="wr-textarea-grid">
+                    <label><span>App Thu ngân F&amp;B</span><textarea id="wrAppFnb" rows="3" placeholder="Mỗi ý một dòng. VD: 290 ATC F&B; 12 case cài App Desktop..."></textarea></label>
+                    <label><span>Vấn đề nổi bật / case cần theo sát</span><textarea id="wrIssues" rows="3" placeholder="Mỗi ý một dòng. VD: Quậy Central - tiếp tục phối hợp PTSP/DEV..."></textarea></label>
+                    <label><span>Nội dung bổ sung khác</span><textarea id="wrExtra" rows="3" placeholder="Doanh số phần cứng, chương trình sticker/KV66... nếu cần"></textarea></label>
+                    <label><span>Kế hoạch tuần tiếp theo</span><textarea id="wrPlans" rows="5"></textarea></label>
+                </div>
+                <button type="button" class="wr-btn wr-btn-ghost" onclick="resetWeeklyReportManual()">🗑️ Xóa toàn bộ ghi chú thủ công</button>
+            </details>
+
+            <div class="wr-action-row">
+                <button id="wrGenerateBtn" class="wr-btn wr-btn-primary" onclick="generateWeeklyReport()">⚡ Tạo báo cáo tự động</button>
+                <button class="wr-btn wr-btn-success" onclick="copyWeeklyReportForAtlassian()">📋 Copy sang Atlassian</button>
+                <button class="wr-btn wr-btn-blue" onclick="downloadWeeklyReportWord()">📄 Tải Word (.docx)</button>
+                <button class="wr-btn wr-btn-ghost" onclick="downloadWeeklyReportHtml()">🌐 Tải HTML</button>
+                <button class="wr-btn wr-btn-ghost" onclick="printWeeklyReport()">🖨️ In / PDF</button>
+                <button class="wr-btn wr-btn-warn" onclick="saveWeeklyReportSnapshot()">💾 Lưu mốc tuần</button>
+            </div>
+            <div id="wrStatus" class="wr-status">Chọn ngày rồi bấm <b>Tạo báo cáo tự động</b>. Lần đầu có thể mất vài giây để tải đủ dữ liệu.</div>
+        </div>
+
+        <div id="wrEditBar" class="wr-edit-bar" style="display:none;">
+            <div class="wr-edit-info">
+                <span class="wr-edit-badge">✏️ SỬA TRỰC TIẾP</span>
+                <span class="wr-edit-hint">Click chuột trực tiếp vào bất kỳ chữ, số hoặc ô bảng nào bên dưới để sửa nội dung trước khi xuất.</span>
+            </div>
+            <div class="wr-edit-actions">
+                <button type="button" class="wr-tb-btn" onmousedown="event.preventDefault()" onclick="wrExecDocFormat('bold')" title="In đậm (Ctrl+B)"><b>B</b></button>
+                <button type="button" class="wr-tb-btn" onmousedown="event.preventDefault()" onclick="wrExecDocFormat('italic')" title="In nghiêng (Ctrl+I)"><i>I</i></button>
+                <button type="button" class="wr-tb-btn" onmousedown="event.preventDefault()" onclick="wrExecDocFormat('underline')" title="Gạch chân (Ctrl+U)"><u>U</u></button>
+                <button type="button" class="wr-tb-btn" onmousedown="event.preventDefault()" onclick="wrExecDocFormat('insertUnorderedList')" title="Danh sách gạch đầu dòng">• List</button>
+                <span class="wr-tb-sep"></span>
+                <button type="button" class="wr-tb-btn" onmousedown="event.preventDefault()" onclick="wrAddTableRow('doc')" title="Thêm hàng vào bảng đang chọn (ngay dưới con trỏ)">➕ Hàng</button>
+                <button type="button" class="wr-tb-btn wr-tb-danger" onmousedown="event.preventDefault()" onclick="wrDeleteTableRow('doc')" title="Xóa hàng đang đặt con trỏ">➖ Xóa hàng</button>
+                <button type="button" class="wr-tb-btn" onmousedown="event.preventDefault()" onclick="wrAddTableCol('doc')" title="Thêm cột vào bảng đang chọn (ngay bên phải con trỏ)">➕ Cột</button>
+                <button type="button" class="wr-tb-btn wr-tb-danger" onmousedown="event.preventDefault()" onclick="wrDeleteTableCol('doc')" title="Xóa cột đang đặt con trỏ">➖ Xóa cột</button>
+                <span class="wr-tb-sep"></span>
+                <div class="wr-dropdown-wrap">
+                    <button type="button" class="wr-tb-btn wr-dropdown-btn" onmousedown="event.preventDefault()" onclick="wrToggleDropdown('wrBgPopover_doc')" title="Sửa màu nền ô, hàng hoặc bảng">🪣 Nền ô/bảng ▾</button>
+                    <div class="wr-color-popover" id="wrBgPopover_doc" style="display:none;" onmousedown="event.stopPropagation()"></div>
+                </div>
+                <div class="wr-dropdown-wrap">
+                    <button type="button" class="wr-tb-btn wr-dropdown-btn" onmousedown="event.preventDefault()" onclick="wrToggleDropdown('wrTextColPopover_doc')" title="Sửa màu chữ">🎨 Màu chữ ▾</button>
+                    <div class="wr-color-popover" id="wrTextColPopover_doc" style="display:none;" onmousedown="event.stopPropagation()"></div>
+                </div>
+                <div class="wr-dropdown-wrap">
+                    <button type="button" class="wr-tb-btn wr-dropdown-btn" onmousedown="event.preventDefault()" onclick="wrToggleDropdown('wrHilitePopover_doc')" title="Sửa màu nền chữ (bút dạ quang highlight)">🖍️ Nền chữ ▾</button>
+                    <div class="wr-color-popover" id="wrHilitePopover_doc" style="display:none;" onmousedown="event.stopPropagation()"></div>
+                </div>
+                <span class="wr-tb-sep"></span>
+                <button type="button" class="wr-tb-btn" onclick="wrToggleEditMode()" id="wrToggleEditBtn" title="Bật/Khóa chỉnh sửa">🔓 Đang mở sửa</button>
+                <button type="button" class="wr-tb-btn wr-btn-reset-report" onclick="wrResetToOriginalReport()" title="Khôi phục lại nội dung và số liệu gốc ban đầu">🔄 Khôi phục số liệu gốc</button>
+            </div>
+        </div>
+
+        <div id="weeklyReportPreview" class="wr-preview-shell">
+            <div class="wr-empty">Chưa tạo báo cáo. Dữ liệu KPI, hiệu suất, data treo, data đổ mới, ATC tự tạo và thời lượng hỗ trợ sẽ được hệ thống tổng hợp tự động.</div>
+        </div>
+    </div>
+
+    <div id="dashboardChamCong" class="tab-content hidden cc-page">
+        <div class="ldr-section cc-shell">
+            <div class="cc-page-header">
+                <div>
+                    <div class="cc-eyebrow">VẬN HÀNH NHÂN SỰ</div>
+                    <h3 class="ldr-section-title cc-page-title">📝 Chấm công SC</h3>
+                    <p class="cc-page-subtitle">Chỉ các dòng đã thay đổi mới được gửi lên Sheet <b>Chi tiết công MN (Tỉnh & HCM)</b>.</p>
+                </div>
+                <div class="cc-header-actions">
+                    <button class="cc-btn cc-btn-secondary" onclick="refreshChamCongData()" title="Tải lại dữ liệu mới nhất từ Google Sheets">🔄 Tải lại</button>
+                    <button id="btnSubmitChamCong" class="cc-btn cc-btn-primary" onclick="submitChamCongToGoogleSheets()" disabled>
+                        💾 Chưa có thay đổi
+                    </button>
+                </div>
+            </div>
+
+            <div id="chamCongSummary" class="cc-summary-grid">
+                <div class="cc-summary-card"><span>📋 Đang hiển thị</span><strong id="ccSummaryVisible">0</strong><small>dòng</small></div>
+                <div class="cc-summary-card"><span>👥 Nhân sự</span><strong id="ccSummaryStaff">0</strong><small>người</small></div>
+                <div class="cc-summary-card cc-summary-done"><span>✅ Đã chấm</span><strong id="ccSummaryDone">0</strong><small>dòng</small></div>
+                <div class="cc-summary-card cc-summary-pending"><span>⏳ Chưa chấm</span><strong id="ccSummaryPending">0</strong><small>dòng</small></div>
+                <div class="cc-summary-card cc-summary-edited"><span>✍️ Chờ nộp</span><strong id="ccSummaryEdited">0</strong><small>dòng thay đổi</small></div>
+            </div>
+
+            <div class="cc-control-panel">
+                <div class="cc-control-section">
+                    <div class="cc-control-heading">🔎 Bộ lọc hiển thị</div>
+                    <div class="cc-filter-grid">
+                        <label class="cc-field cc-field-search">
+                            <span>Tìm nhân sự</span>
+                            <input type="text" id="chamCongSearchInput" oninput="renderChamCongView()" placeholder="Nhập tên hoặc mã nhân viên...">
+                        </label>
+                        <label class="cc-field">
+                            <span>Nhân sự</span>
+                            <select id="chamCongStaffFilter" onchange="renderChamCongView()" class="ldr-select">
+                                <option value="ALL">Tất cả nhân sự</option>
+                            </select>
+                        </label>
+                        <label class="cc-field">
+                            <span>Trạng thái</span>
+                            <select id="chamCongStatusFilter" onchange="renderChamCongView()" class="ldr-select">
+                                <option value="ALL">Tất cả trạng thái</option>
+                                <option value="PENDING">Chưa chấm công</option>
+                                <option value="DONE">Đã chấm công</option>
+                                <option value="X">Có mặt (X)</option>
+                                <option value="X/2">Nửa ngày (X/2)</option>
+                                <option value="OFF">Nghỉ tuần (OFF)</option>
+                                <option value="L">Nghỉ lễ (L)</option>
+                                <option value="P">Nghỉ phép (P)</option>
+                                <option value="KP">Không phép (KP)</option>
+                            </select>
+                        </label>
+                        <label class="cc-field cc-field-day">
+                            <span>Từ ngày</span>
+                            <select id="chamCongDayFrom" onchange="onChamCongDateChange()" class="ldr-select">
+                                <option value="">Dầu kỳ</option>
+                            </select>
+                        </label>
+                        <label class="cc-field cc-field-day">
+                            <span>Đến ngày</span>
+                            <select id="chamCongDayTo" onchange="onChamCongDateChange()" class="ldr-select">
+                                <option value="">Cuối kỳ</option>
+                            </select>
+                        </label>
+                        <button class="cc-btn cc-btn-ghost cc-filter-reset" onclick="resetChamCongFilters()">↺ Xóa bộ lọc</button>
+                    </div>
+                </div>
+
+                <div class="cc-control-section cc-bulk-section">
+                    <div class="cc-control-heading">⚡ Thao tác trên các dòng đang hiển thị</div>
+                    <div class="cc-bulk-row">
+                        <div class="cc-view-toggle" aria-label="Chọn kiểu hiển thị">
+                            <button id="btnChamCongViewCard" class="cc-view-btn" onclick="toggleChamCongViewMode('card')">📱 Dạng thẻ</button>
+                            <button id="btnChamCongViewTable" class="cc-view-btn" onclick="toggleChamCongViewMode('table')">💻 Dạng bảng</button>
+                        </div>
+                        <div class="cc-bulk-actions">
+                            <button class="cc-btn cc-btn-soft-blue" onclick="autoFillChamCongAll('SUGGEST')">✨ Đề xuất chấm công</button>
+                            <button class="cc-btn cc-btn-soft-red" onclick="autoFillChamCongAll('RESET')">↺ Bỏ mọi thay đổi</button>
+                        </div>
+                    </div>
+                    <div class="cc-scope-note">💡 Chỉ đề xuất ô trống: <b>≥ 6 giờ → X</b>, <b>&lt; 5 giờ → X/2</b>, <b>không có dữ liệu → OFF</b>. Từ 5 đến dưới 6 giờ giữ trống để kiểm tra.</div>
+                </div>
+            </div>
+
+            <div id="chamCongActionNotice" class="cc-action-notice hidden"></div>
+            <div id="chamCongApiStatus" class="cc-api-status">
+                <span>⏳ Đang kiểm tra kết nối Google Sheets...</span>
+            </div>
+            <div id="chamCongTableContainer" class="cc-data-container"></div>
+        </div>
+    </div>
+
+</body>
+</html>

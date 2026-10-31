@@ -1,0 +1,18 @@
+FIX V2 - BÁO CÁO TUẦN
+
+Đã sửa 4 lỗi chính:
+1) Chế độ sáng/tối: bảng báo cáo tự đổi màu theo theme, không còn hard-code bảng tối.
+2) KPI: lấy dữ liệu theo đúng tên cột sheet, không dùng Object.values() nên không còn ô blank/lệch cột.
+3) Không kéo ngang trên desktop: bảng dùng table-layout fixed, tự wrap chữ và co vừa khung. Mobile mới cho phép kéo ngang.
+4) Word: nút xuất Word giờ tạo file .DOCX thật (OOXML), khổ A4 ngang, không còn HTML giả đuôi .doc nên bảng không vỡ.
+
+Fix thêm:
+- Sửa lỗi hiệu suất 0.00 ATC/ngày: trước đây code ưu tiên đọc 'Thời gian checkin' (chỉ có giờ) trước 'Ngày checkin', làm filter ngày bị rỗng. V2 ưu tiên trường ngày trước.
+- Đánh số La Mã động (I, II, III...): tự động tăng số liền mạch, không còn trùng hoặc nhảy số khi ẩn/hiện các mục bổ sung.
+- Tên file tải về chuẩn dải ngày: định dạng `Bao_cao_tuan_SC_[Từ_ngày]_den_[Đến_ngày].docx` / `.html`.
+
+Cách dùng:
+- FULL: thay project bằng toàn bộ thư mục này.
+- PATCH: chép đè index.html và tab-bao-cao.js vào project hiện tại.
+- Deploy lại Netlify và hard refresh Ctrl+F5 để tránh cache JS cũ.
+

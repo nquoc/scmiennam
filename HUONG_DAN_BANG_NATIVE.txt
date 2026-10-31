@@ -1,0 +1,22 @@
+BẢN NÂNG CẤP BÁO CÁO TUẦN — BẢNG NATIVE GIỐNG DASHBOARD
+
+Thay đổi chính:
+1. KPI: dựng đủ bảng 15 cột từ dữ liệu KPI gốc, giữ màu xanh/vàng/đỏ theo % giống tab KPI.
+2. Hiệu suất: dựng bảng STT / Tên NS / T công / Tổng ATC / Impact / KM / Giờ SP / 3 chỉ số TB, có tô màu theo min-max giống bảng hiệu suất.
+3. Data treo: dựng 2 bảng native theo Khu vực và Nhân sự, không dùng ảnh.
+4. Data đổ theo ngày: dựng đủ từng cột ngày + Trung bình + Grand Total, giữ thứ tự tỉnh như sheet.
+5. ATC tự tạo: dựng bảng giống mục Phát hiện gian lận với badge xanh/vàng/đỏ.
+6. Thời lượng hỗ trợ: dựng ma trận từng nhân sự x từng khung thời gian, tô màu tỷ trọng giống dashboard.
+7. Copy Atlassian: trước khi copy, hệ thống chuyển style hiện tại thành inline HTML để tăng khả năng giữ bảng/màu khi paste.
+8. Word/HTML export: không cần ảnh chụp; các bảng là HTML thật nên chữ/số vẫn selectable/editable.
+
+Cách dùng:
+- Deploy như project cũ.
+- Mở tab Báo cáo tuần.
+- Chọn Từ ngày / Đến ngày.
+- Bấm "Tạo báo cáo tự động".
+- Các bảng trong báo cáo sẽ được dựng lại theo giao diện Dashboard thay vì bảng rút gọn trước đây.
+
+File chỉnh chính:
+- tab-bao-cao.js
+- index.html

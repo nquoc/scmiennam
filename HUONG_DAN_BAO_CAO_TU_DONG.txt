@@ -1,0 +1,78 @@
+TÍNH NĂNG MỚI: 🧾 BÁO CÁO TUẦN TỰ ĐỘNG
+=========================================
+
+1) Sau khi deploy, mở Dashboard và chọn tab: 🧾 Báo cáo tuần
+
+2) Chọn khoảng thời gian:
+   - Mặc định: từ ngày 01 của tháng hiện tại đến hôm nay.
+   - Báo cáo KPI vẫn lấy bảng KPI hiện tại trên Google Sheets.
+
+3) Bấm: ⚡ Tạo báo cáo tự động
+   Web sẽ tự lấy và tổng hợp:
+   - KPI team + nhân sự
+   - Hiệu suất: ATC/ngày, giờ hỗ trợ/ngày, KM/ngày
+   - Data treo / data đang nằm trên nhân sự
+   - Data đổ mới theo tỉnh
+   - Tỷ lệ ATC tự tạo
+   - Tỷ lệ hỗ trợ 0-5 phút và các nhóm thời gian
+
+4) Các phần web chưa có dữ liệu chuẩn để tự tính được thì nhập ở mục:
+   “Nội dung bổ sung & Mục tùy chỉnh”
+   - TỰ THÊM MỤC TÙY CHỈNH (Nút: ➕ Thêm mục tùy chỉnh):
+     * Tự đặt tiêu đề mục theo ý muốn (VD: Hình ảnh kiểm tra thực tế, Bảng theo dõi KV66...)
+     * Thanh công cụ Mini WYSIWYG: In đậm, In nghiêng, Danh sách gạch đầu dòng, Đánh số.
+     * 🖼️ Chèn ảnh: Chọn ảnh từ máy tính, chèn qua link URL, hoặc PASTE ẢNH TRỰC TIẾP (Ctrl+V) từ Snipping Tool / Clipboard!
+     * 📊 Quản lý bảng linh hoạt: Chèn bảng tùy ý (nhập số hàng & cột); có nút "➕ Hàng", "➖ Xóa hàng" (xóa ngay hàng đang đặt con trỏ), "➕ Cột", "➖ Xóa cột" (xóa ngay cột đang đặt con trỏ).
+     * 🪣 Sửa màu nền ô & bảng: Đổi màu nền nhanh chóng cho [Ô đang chọn], [Cả hàng], hoặc [Cả bảng] (Hỗ trợ màu Xanh lá Đạt, Vàng Cảnh báo, Đỏ Nguy cơ, Xanh lam, Xám tiêu đề, Trắng, hoặc chọn màu tự do).
+     * 🎨 Sửa màu chữ & 🖍️ Bút dạ quang (Nền chữ): Đổi màu chữ nhanh và tô màu nền highlight cho đoạn văn bản bôi đen.
+   - Các ghi chú nhanh:
+     * Case đổi thông tin/địa chỉ + số đã đổi OTP
+     * App Thu ngân F&B
+     * Vấn đề nổi bật / case cần theo sát
+     * Kế hoạch tuần tiếp theo
+   Tất cả nội dung, bảng biểu và màu sắc được lưu tự động trong localStorage trình duyệt.
+
+4b) TÍNH NĂNG MỚI: ✏️ CHỈNH SỬA TRỰC TIẾP TRÊN BẢN BÁO CÁO
+   - Ngay sau khi bấm "⚡ Tạo báo cáo tự động", toàn bộ bản báo cáo hiện ra ở khung xem trước đã được MỞ KHÓA CHỈNH SỬA.
+   - Anh có thể:
+     * Click chuột vào bất kỳ đoạn văn, câu nhận xét nào để gõ sửa lại theo lời văn của anh.
+     * Click vào bất kỳ ô số liệu trong bảng để sửa số/tên (Bấm Tab để nhảy nhanh sang ô tiếp theo như Excel).
+     * Thanh công cụ phía trên hỗ trợ: In đậm (B), In nghiêng (I), Gạch chân (U), Gạch đầu dòng (• List).
+     * Thao tác bảng trực tiếp trên báo cáo: Thêm hàng/cột, Xóa hàng/cột, Đổi màu nền ô/bảng, Đổi màu chữ, Tô sáng dạ quang (🖍️ Nền chữ).
+     * Nút "🔓 Đang mở sửa" để khóa/mở khóa nếu chỉ muốn chọn text.
+     * Nút "🔄 Khôi phục số liệu gốc" nếu muốn bỏ các sửa đổi và lấy lại số tự động ban đầu.
+   - Tất cả chỉnh sửa này sẽ được GIỮ NGUYÊN khi:
+     * Bấm "📋 Copy sang Atlassian" (paste sang Confluence là có đầy đủ nội dung, bảng biểu và màu sắc anh vừa sửa).
+     * Bấm "📄 Tải Word (.docx)" (file Word nhận trực tiếp các đoạn văn, bảng và màu sắc anh đã sửa).
+     * Bấm "🌐 Tải HTML" hoặc "🖨️ In / PDF".
+
+5) Bấm: 📋 Copy sang Atlassian
+   Báo cáo được copy dưới dạng rich HTML (text + bảng native), KHÔNG dùng ảnh.
+   Vì vậy paste vào Confluence/Atlassian sẽ dễ giữ nội dung và vẫn sửa được.
+
+6) Sau khi chốt báo cáo tuần, bấm: 💾 Lưu mốc tuần
+   Tuần sau web tự so sánh:
+   - ATC TB/ngày
+   - Thời gian hỗ trợ TB
+   - ATC tự tạo
+   - Data treo & tồn
+   - Một số chỉ số chính khác
+
+7) Có thêm:
+   - 📄 Tải Word (.doc)
+   - 🌐 Tải HTML
+   - 🖨️ In / lưu PDF
+
+CÁC FILE ĐÃ THÊM/SỬA
+---------------------
+- tab-bao-cao.js       (MỚI)
+- index.html           (thêm tab + giao diện báo cáo)
+- core.js              (thêm switch tab baocao)
+- style.css            (CSS giao diện báo cáo)
+
+LƯU Ý BẢO MẬT QUAN TRỌNG
+------------------------
+Trong code hiện tại, Gemini API key đang được đặt ở frontend (tab-ai.js, dù có base64 vẫn đọc được).
+Vì site Netlify không cần đăng nhập, người ngoài có thể xem source và lấy key.
+Nên đổi key và chuyển việc gọi Gemini sang Netlify Function/backend khi có thời gian.
+Tính năng Báo cáo tuần mới KHÔNG phụ thuộc Gemini nên vẫn hoạt động nếu tắt AI.
