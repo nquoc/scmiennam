@@ -584,7 +584,9 @@ function applyFiltersPivotDaLam() {
 
 // --- HELPER FUNCTIONS FOR CUSTOM MULTISELECT ---
 function getEstimatedWorkday(staff) {
-    const list = cacheData['ngaycong'] || [];
+    const list = (cacheData['ngaycong'] && Array.isArray(cacheData['ngaycong']) && cacheData['ngaycong'].length > 0)
+        ? cacheData['ngaycong']
+        : (typeof DEFAULT_ATTENDANCE_B502_O519 !== 'undefined' ? DEFAULT_ATTENDANCE_B502_O519 : []);
     if (!list || list.length === 0) {
         return (staffFilteredActiveDaysMap[staff] && staffFilteredActiveDaysMap[staff].size) || 1;
     }

@@ -37,6 +37,13 @@ var summarySortColumn = null;
 var summarySortDirection = 'asc';
 
 window.onload = function() {
+    // Tự động dọn sạch cache rác ngaycong rỗng nếu có trong session
+    try {
+        const rawNC = sessionStorage.getItem('crm_dashboard_cache_v2_ngaycong');
+        if (rawNC && (rawNC.includes('"data":[]') || rawNC.includes('"data": []'))) {
+            sessionStorage.removeItem('crm_dashboard_cache_v2_ngaycong');
+        }
+    } catch(e) {}
     switchTab('pivotdalam');
     // Chạy ngầm tải trước các tab khác sau 1.5 giây để tránh làm chậm lần đầu load trang
     if (typeof prefetchTabsBackground === 'function') {
@@ -100,6 +107,8 @@ function switchTab(tabName) {
             const cachedNC = getFromSessionCache('ngaycong');
             if (cachedNC && Array.isArray(cachedNC) && cachedNC.length > 0) {
                 cacheData['ngaycong'] = typeof normalizeNgayCongData === 'function' ? normalizeNgayCongData(cachedNC) : cachedNC;
+            } else if (typeof DEFAULT_ATTENDANCE_B502_O519 !== 'undefined') {
+                cacheData['ngaycong'] = DEFAULT_ATTENDANCE_B502_O519;
             }
         }
         
@@ -181,8 +190,12 @@ function fetchData(tabName) {
         .then(response => response.json())
         .then(result => {
             if(result.status === "success") {
-                cacheData[tabName] = result.data;
-                saveToSessionCache(tabName, result.data);
+                if (Array.isArray(result.data) && result.data.length === 0 && tabName === 'ngaycong') {
+                    // Bỏ qua nếu sheet=ngaycong trả về mảng rỗng
+                } else {
+                    cacheData[tabName] = result.data;
+                    saveToSessionCache(tabName, result.data);
+                }
                 onDataLoaded(result.data);
             } else {
                 document.getElementById('loading').innerText = "❌ Lỗi: " + result.message;

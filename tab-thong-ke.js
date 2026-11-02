@@ -290,7 +290,7 @@ function renderThongKeCharts(activeRows, activeDayCols) {
 }
 
 function prefetchTabsBackground() {
-    const tabsToPrefetch = ['data', 'atcdalam', 'thongke', 'hieusuat', 'ngaycong', 'kpi']; // leader tab uses cacheData['hieusuat'] directly, no extra fetch needed
+    const tabsToPrefetch = ['data', 'atcdalam', 'thongke', 'hieusuat', 'kpi']; // leader tab uses cacheData['hieusuat'] directly; ngaycong tu Chi tiet cong MN
     tabsToPrefetch.forEach(tabName => {
         if (cacheData[tabName] || getFromSessionCache(tabName)) return;
         
@@ -304,7 +304,7 @@ function prefetchTabsBackground() {
         fetch(fetchUrl)
             .then(response => response.json())
             .then(result => {
-                if (result.status === "success") {
+                if (result.status === "success" && Array.isArray(result.data) && result.data.length > 0) {
                     cacheData[tabName] = result.data;
                     saveToSessionCache(tabName, result.data);
                     console.log(`[Prefetch] Đã tải xong dữ liệu tab: ${tabName}`);
