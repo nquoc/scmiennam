@@ -1086,7 +1086,7 @@ function renderChamCongMobileCards(data, container) {
             `;
         }).join('');
 
-        const staffTeam = getStaffTeam(fullName, row.ma_nv);
+        const staffTeam = getStaffTeam(fullName, r.ma_nv);
         const teamBadge = staffTeam === 'HCM'
             ? '<span style="font-size:10px; font-weight:700; background:rgba(59,130,246,0.15); color:#2563eb; padding:2px 6px; border-radius:4px;">Team HCM</span>'
             : '<span style="font-size:10px; font-weight:700; background:rgba(16,185,129,0.15); color:#059669; padding:2px 6px; border-radius:4px;">Team Tỉnh</span>';
