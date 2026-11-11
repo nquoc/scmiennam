@@ -719,6 +719,11 @@ function processAndRenderChamCongData(data, connectionMode) {
             Number(row.ngay) <= 31
         ));
     window.chamCongAllData = safeData;
+    window._pivotDailyChamCongRecords = null;
+    try {
+        const cachePrefix = typeof API_CACHE_KEY_PREFIX !== 'undefined' ? API_CACHE_KEY_PREFIX : 'crm_dashboard_cache_v2_';
+        sessionStorage.removeItem(cachePrefix + 'chamcong_daily_v1');
+    } catch (e) {}
     window.chamCongData = [];
     window.chamCongEditedRows = {};
     window.chamCongConnectionMode = connectionMode || '';

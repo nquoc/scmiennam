@@ -197,6 +197,10 @@ function onPivotDaLamDataLoaded(rawInputData) {
     if (typeof currentTab !== 'undefined' && currentTab === 'leader') {
         if (typeof initLeaderTab === 'function') initLeaderTab();
     }
+
+    if (typeof ensureDailyChamCongRecords === 'function') {
+        ensureDailyChamCongRecords().catch(() => {});
+    }
 }
 
 function renderPivotDaLamFields() {
@@ -1421,7 +1425,7 @@ function renderSummaryPerformanceTable(filteredData) {
         html += '<tr>';
         html += `<td style="text-align: center; font-variant-numeric: tabular-nums;">${idx + 1}</td>`;
         html += `<td class="row-label clickable-cell" style="text-align: left; font-weight: 500; cursor: pointer;" onclick="showSummaryStaffDetails('${row.cleanName.replace(/'/g, "\\'")}', 'atc')">${row.cleanName}</td>`;
-        html += `<td style="text-align: center; font-variant-numeric: tabular-nums;">${formatNumber(row.tCong)}</td>`;
+        html += `<td class="clickable-val-cell" style="text-align: center; font-variant-numeric: tabular-nums; cursor: pointer;" title="Bấm để xem chi tiết ngày công theo từng ngày" onclick="showSummaryStaffDetails('${row.cleanName.replace(/'/g, "\\'")}', 'atc')">${formatNumber(row.tCong)}</td>`;
         html += `<td class="clickable-val-cell" style="text-align: center; font-variant-numeric: tabular-nums; cursor: pointer;" onclick="showSummaryStaffDetails('${row.cleanName.replace(/'/g, "\\'")}', 'atc')">${formatNumber(row.totalATC)}</td>`;
         html += `<td class="clickable-val-cell" style="text-align: center; font-variant-numeric: tabular-nums; cursor: pointer;" onclick="showSummaryStaffDetails('${row.cleanName.replace(/'/g, "\\'")}', 'impact')">${formatNumber(row.totalImpact)}</td>`;
         html += `<td class="clickable-val-cell" style="text-align: center; font-variant-numeric: tabular-nums; cursor: pointer;" onclick="showSummaryStaffDetails('${row.cleanName.replace(/'/g, "\\'")}', 'km')">${formatNumber(row.totalKM)}</td>`;
@@ -1459,12 +1463,243 @@ function renderSummaryPerformanceTable(filteredData) {
     return rowsData;
 }
 
-function showSummaryStaffDetails(staffName, metricType) {
+function escapePivotHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function extractCleanStaffNamePivot(rawName) {
+    const s = String(rawName || '').trim();
+    if (!s) return '';
+    const parts = s.split('-');
+    if (parts.length >= 2) {
+        return parts[1].trim().replace(/\s+/g, ' ');
+    }
+    return s.replace(/\s+/g, ' ');
+}
+
+function getDailyChamCongStatusMeta(rawStatus) {
+    const code = String(rawStatus || '').trim();
+    const upper = code.toUpperCase();
+    if (!upper) {
+        return { code: '', cong: 0, label: '⏳ Chưa chấm', badgeClass: 'cong-badge-pending', hasValue: false };
+    }
+    if (upper === 'X') {
+        return { code: 'X', cong: 1, label: '✅ X · 1 công', badgeClass: 'cong-badge-full', hasValue: true };
+    }
+    if (upper === 'X/2') {
+        return { code: 'X/2', cong: 0.5, label: '🌓 X/2 · 0,5 công', badgeClass: 'cong-badge-half', hasValue: true };
+    }
+    if (upper === 'XP') {
+        return { code: 'XP', cong: 0.5, label: '🌗 XP · 0,5 công', badgeClass: 'cong-badge-xp', hasValue: true };
+    }
+    if (upper === 'XU') {
+        return { code: 'XU', cong: 0.5, label: '🌗 XU · 0,5 công', badgeClass: 'cong-badge-half', hasValue: true };
+    }
+    if (upper === 'OFF') {
+        return { code: 'OFF', cong: 0, label: '🛌 OFF · 0 công', badgeClass: 'cong-badge-off', hasValue: true };
+    }
+    if (upper === 'P' || upper === 'P/2') {
+        return { code: upper, cong: 0, label: `📝 ${upper} · 0 công`, badgeClass: 'cong-badge-leave', hasValue: true };
+    }
+    if (upper === 'L') {
+        return { code: 'L', cong: 0, label: '🎉 L · 0 công', badgeClass: 'cong-badge-holiday', hasValue: true };
+    }
+    if (upper === 'KP') {
+        return { code: 'KP', cong: 0, label: '⛔ KP · 0 công', badgeClass: 'cong-badge-absent', hasValue: true };
+    }
+    if (upper === 'U' || upper === 'U/2') {
+        return { code: upper, cong: 0, label: `📌 ${upper} · 0 công`, badgeClass: 'cong-badge-off', hasValue: true };
+    }
+    return { code: upper, cong: 0, label: `${code} · 0 công`, badgeClass: 'cong-badge-custom', hasValue: true };
+}
+
+function normalizeDailyChamCongRows(rawRows) {
+    if (!Array.isArray(rawRows)) return [];
+    const normalized = [];
+    for (let i = 0; i < rawRows.length; i++) {
+        const r = rawRows[i];
+        if (!r) continue;
+        let staffFull = '';
+        let thu = '';
+        let dayNum = NaN;
+        let inTime = '';
+        let outTime = '';
+        let totalTime = '';
+        let actCount = '';
+        let status = '';
+        let note = '';
+
+        if (Array.isArray(r)) {
+            staffFull = String(r[1] || '').trim();
+            thu = String(r[3] || '').trim();
+            dayNum = Number(r[4]);
+            inTime = String(r[5] || '').trim();
+            outTime = String(r[6] || '').trim();
+            totalTime = String(r[7] || '').trim();
+            actCount = String(r[8] || '').trim();
+            status = String(r[10] || '').trim();
+            note = String(r[11] || '').trim();
+        } else if (typeof r === 'object') {
+            if (r.cleanStaff && Number.isInteger(Number(r.dayNum))) {
+                normalized.push(r);
+                continue;
+            }
+            staffFull = String(r.staff || r['Họ và tên'] || r['Tên NS'] || '').trim();
+            thu = String(r.thu || r['Thứ'] || '').trim();
+            dayNum = Number(r.ngay !== undefined ? r.ngay : r['Ngày']);
+            inTime = String(r.in_time || r['In sớm nhất'] || '').trim();
+            outTime = String(r.out_time || r['Out trễ nhất'] || '').trim();
+            totalTime = String(r.total_time || r['Tổng thời gian làm việc'] || '').trim();
+            actCount = String(r.act_count || r['Số act đã làm'] || '').trim();
+            status = String(r.cham_cong !== undefined ? r.cham_cong : (r['Chấm công'] || '')).trim();
+            note = String(r.ghi_chu !== undefined ? r.ghi_chu : (r['Ghi Chú'] || '')).trim();
+        }
+
+        if (!staffFull || ['Tên NS', 'TỔNG CỘNG', 'STT', 'Họ và tên'].includes(staffFull)) continue;
+        if (!Number.isInteger(dayNum) || dayNum < 1 || dayNum > 31) continue;
+
+        normalized.push({
+            cleanStaff: extractCleanStaffNamePivot(staffFull),
+            staffFull,
+            thu,
+            dayNum,
+            inTime,
+            outTime,
+            totalTime,
+            actCount,
+            status,
+            note
+        });
+    }
+    return normalized;
+}
+
+function getDailyChamCongRecordsSync() {
+    if (Array.isArray(window.chamCongAllData) && window.chamCongAllData.length > 0) {
+        return normalizeDailyChamCongRows(window.chamCongAllData);
+    }
+    if (Array.isArray(window._pivotDailyChamCongRecords) && window._pivotDailyChamCongRecords.length > 0) {
+        return window._pivotDailyChamCongRecords;
+    }
+    if (typeof getFromSessionCache === 'function') {
+        const cached = getFromSessionCache('chamcong_daily_v1');
+        if (Array.isArray(cached) && cached.length > 0) {
+            const normalized = normalizeDailyChamCongRows(cached);
+            window._pivotDailyChamCongRecords = normalized;
+            return normalized;
+        }
+    }
+    return null;
+}
+
+async function ensureDailyChamCongRecords() {
+    const syncRecords = getDailyChamCongRecordsSync();
+    if (syncRecords) return syncRecords;
+    if (window._dailyChamCongFetchPromise) {
+        return window._dailyChamCongFetchPromise;
+    }
+
+    window._dailyChamCongFetchPromise = (async () => {
+        try {
+            if (typeof getDirectAccessToken !== 'function') return null;
+            const token = await getDirectAccessToken();
+            const sId = typeof SPREADSHEET_ID !== 'undefined'
+                ? SPREADSHEET_ID
+                : (typeof CHAMCONG_SPREADSHEET_ID !== 'undefined' ? CHAMCONG_SPREADSHEET_ID : '1mEuMm3Pntsn3HenWQ33aNlRG50W9daVM5HjrV9pmxY8');
+            const tSheet = typeof TARGET_SHEET !== 'undefined' ? TARGET_SHEET : 'Chi tiết công MN (Tỉnh & HCM)';
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sId}/values/'${encodeURIComponent(tSheet)}'!A2:L500`;
+            const res = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error(`Sheets API ${res.status}`);
+            const json = await res.json();
+            const parsed = normalizeDailyChamCongRows(json.values || []);
+            if (parsed.length > 0) {
+                window._pivotDailyChamCongRecords = parsed;
+                if (typeof saveToSessionCache === 'function') {
+                    saveToSessionCache('chamcong_daily_v1', parsed);
+                }
+            }
+            return parsed;
+        } catch (err) {
+            console.warn('ensureDailyChamCongRecords warning:', err);
+            return null;
+        } finally {
+            window._dailyChamCongFetchPromise = null;
+        }
+    })();
+
+    return window._dailyChamCongFetchPromise;
+}
+
+function lookupStaffDayAttendance(records, cleanStaffName, dayNum) {
+    if (!Array.isArray(records) || records.length === 0) return null;
+    const targetLower = extractCleanStaffNamePivot(cleanStaffName).toLowerCase();
+    const targetDay = Number(dayNum);
+    if (!targetLower || !targetDay) return null;
+
+    let row = records.find(r => r.dayNum === targetDay && r.cleanStaff.toLowerCase() === targetLower);
+    if (!row) {
+        row = records.find(r => r.dayNum === targetDay && (
+            r.cleanStaff.toLowerCase().includes(targetLower) ||
+            targetLower.includes(r.cleanStaff.toLowerCase())
+        ));
+    }
+    if (!row) return null;
+
+    return {
+        ...row,
+        meta: getDailyChamCongStatusMeta(row.status)
+    };
+}
+
+function buildDailyAttendanceTooltip(att) {
+    if (!att) return '';
+    const parts = [];
+    if (att.thu) parts.push(`${att.thu}, Ngày ${att.dayNum}`);
+    if (att.inTime && att.outTime && !(att.inTime === '0:00' && att.outTime === '0:00')) {
+        let clockStr = `Vào ${att.inTime} - Ra ${att.outTime}`;
+        if (att.totalTime && att.totalTime !== '0:00') {
+            clockStr += ` (${att.totalTime})`;
+        }
+        parts.push(clockStr);
+    } else if (att.totalTime && att.totalTime !== '0:00') {
+        parts.push(`Thời gian làm: ${att.totalTime}`);
+    }
+    if (att.note) {
+        const cleanNote = att.note.replace(/\s+/g, ' ').trim();
+        parts.push(`Ghi chú: ${cleanNote}`);
+    }
+    return parts.join(' · ');
+}
+
+function staffHasAnyAttendanceRow(records, cleanStaffName) {
+    if (!Array.isArray(records) || records.length === 0) return false;
+    const targetLower = extractCleanStaffNamePivot(cleanStaffName).toLowerCase();
+    return records.some(r => r.cleanStaff.toLowerCase() === targetLower ||
+        r.cleanStaff.toLowerCase().includes(targetLower) ||
+        targetLower.includes(r.cleanStaff.toLowerCase()));
+}
+
+function showSummaryStaffDetails(staffName, metricType, existingRenderToken = null, fetchSettled = false) {
     const dataset = pivotDaLamFilteredData || pivotDaLamRawData;
     if (!dataset) return;
     
     let staffRecords = dataset.filter(row => row['Người xử lý'] === staffName);
     if (staffRecords.length === 0) return;
+
+    let renderToken = existingRenderToken;
+    if (!renderToken) {
+        window._summaryModalRenderId = (window._summaryModalRenderId || 0) + 1;
+        renderToken = window._summaryModalRenderId;
+    } else if (window._summaryModalRenderId !== renderToken) {
+        return;
+    }
     
     const dailyData = {};
     staffRecords.forEach(row => {
@@ -1510,30 +1745,62 @@ function showSummaryStaffDetails(staffName, metricType) {
     const bodyEl = document.getElementById('pivotListModalBody');
     if (!bodyEl) return;
     bodyEl.innerHTML = '';
+
+    const dailyRecords = getDailyChamCongRecordsSync();
+    const isLoadingDaily = !dailyRecords && !fetchSettled;
+    const hasStaffDailyRows = dailyRecords ? staffHasAnyAttendanceRow(dailyRecords, staffName) : false;
     
     let grandTotal = 0;
+    let sumDailyCong = 0;
+    let pendingCount = 0;
+    let matchedDayCount = 0;
     
     sortedDays.forEach(day => {
         const val = dailyData[day];
         grandTotal += val;
+
+        const att = dailyRecords ? lookupStaffDayAttendance(dailyRecords, staffName, day) : null;
+        if (att) {
+            matchedDayCount++;
+            sumDailyCong += att.meta.cong;
+            if (!att.meta.hasValue) pendingCount++;
+        }
         
         const card = document.createElement('div');
-        card.className = 'pivot-detail-card';
+        card.className = 'pivot-detail-card summary-day-card';
         card.style.cursor = 'pointer';
-        card.style.display = 'flex';
-        card.style.justifyContent = 'space-between';
-        card.style.alignItems = 'center';
-        card.style.padding = '12px 15px';
         
         card.onclick = function() {
             showSummaryDayDetails(staffName, day);
         };
         
         const formattedVal = val.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        const thuHtml = (att && att.thu) ? `<span class="summary-day-thu">(${escapePivotHtml(att.thu)})</span>` : '';
+
+        let badgeHtml = '';
+        if (att) {
+            const tooltip = escapePivotHtml(buildDailyAttendanceTooltip(att));
+            const titleAttr = tooltip ? ` title="${tooltip}"` : '';
+            badgeHtml = `<span class="summary-cong-badge ${att.meta.badgeClass}"${titleAttr}>${escapePivotHtml(att.meta.label)}</span>`;
+        } else if (isLoadingDaily) {
+            badgeHtml = `<span class="summary-cong-badge cong-badge-loading">⏳ Đang tải công...</span>`;
+        } else if (!dailyRecords) {
+            badgeHtml = `<span class="summary-cong-badge cong-badge-none">Chưa tải được công</span>`;
+        } else if (!hasStaffDailyRows) {
+            badgeHtml = `<span class="summary-cong-badge cong-badge-none">Không có lịch công</span>`;
+        } else {
+            badgeHtml = `<span class="summary-cong-badge cong-badge-none">Không có dòng ngày ${day}</span>`;
+        }
         
         card.innerHTML = `
-            <span style="font-weight: 600; color: #475569;">Ngày ${day}</span>
-            <span style="font-weight: 700; color: #2563eb; font-variant-numeric: tabular-nums;">${formattedVal}${unit} <span style="font-size: 11px; font-weight: normal; color: #94a3b8; margin-left: 5px;">➔</span></span>
+            <div class="summary-day-left">
+                <span class="summary-day-label">Ngày ${day}</span>
+                ${thuHtml}
+            </div>
+            <div class="summary-day-right">
+                ${badgeHtml}
+                <span class="summary-day-metric summary-metric-${metricType}">${formattedVal}${unit}<span class="summary-day-arrow">➔</span></span>
+            </div>
         `;
         bodyEl.appendChild(card);
     });
@@ -1541,27 +1808,68 @@ function showSummaryStaffDetails(staffName, metricType) {
     if (sortedDays.length > 0) {
         const card = document.createElement('div');
         card.className = 'pivot-detail-card summary-total';
-        card.style.cursor = 'default';
-        card.style.pointerEvents = 'none';
-        card.style.display = 'flex';
-        card.style.justifyContent = 'space-between';
-        card.style.alignItems = 'center';
-        card.style.padding = '14px 15px';
         
         const formattedTotal = grandTotal.toLocaleString('vi-VN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        const { fromDayVal, toDayVal } = (typeof getSelectedDateRange === 'function') ? getSelectedDateRange() : { fromDayVal: '', toDayVal: '' };
+        const hasDateFilter = Boolean(fromDayVal || toDayVal);
+        const estimatedTCong = (typeof getEstimatedWorkday === 'function') ? getEstimatedWorkday(staffName) : 0;
+
+        let totalCongHtml = '';
+        const subParts = [];
+        if (matchedDayCount > 0) {
+            const congFormatted = formatNumber(sumDailyCong);
+            totalCongHtml = `<span class="summary-total-cong-pill" title="Tổng số công trên các ngày hiển thị ở trên">📅 ${congFormatted} công</span>`;
+
+            const denom = (!hasDateFilter && estimatedTCong > 0) ? estimatedTCong : sumDailyCong;
+            if (denom > 0) {
+                const avgRatio = (grandTotal / denom).toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                subParts.push(`TB: ${avgRatio}${unit}/công`);
+            }
+            if (!hasDateFilter && hasStaffDailyRows && Math.abs(estimatedTCong - sumDailyCong) > 0.01) {
+                subParts.push(`Bảng công: ${formatNumber(estimatedTCong)} công`);
+            }
+            if (pendingCount > 0) {
+                subParts.push(`${pendingCount} ngày chưa chấm`);
+            }
+        } else if (isLoadingDaily) {
+            totalCongHtml = `<span class="summary-cong-badge cong-badge-loading">⏳ Đang tính công...</span>`;
+        } else if (estimatedTCong > 0) {
+            totalCongHtml = `<span class="summary-total-cong-pill">📅 Bảng công: ${formatNumber(estimatedTCong)} công</span>`;
+        }
+
+        const subHtml = subParts.length > 0
+            ? `<div class="summary-total-sub">${escapePivotHtml(subParts.join(' · '))}</div>`
+            : '';
         
         card.innerHTML = `
-            <span style="font-weight: bold; text-transform: uppercase;">Tổng cộng</span>
-            <span style="font-weight: 800; color: #ef4444; font-size: 15px; font-variant-numeric: tabular-nums;">${formattedTotal}${unit}</span>
+            <div class="summary-total-left">
+                <div class="summary-total-title">Tổng cộng</div>
+                ${subHtml}
+            </div>
+            <div class="summary-day-right">
+                ${totalCongHtml}
+                <span class="summary-total-val">${formattedTotal}${unit}</span>
+            </div>
         `;
         bodyEl.appendChild(card);
     }
     
     const modal = document.getElementById('pivotListModal');
     if (modal) modal.style.display = 'flex';
+
+    if (isLoadingDaily && typeof ensureDailyChamCongRecords === 'function') {
+        ensureDailyChamCongRecords().then(() => {
+            const currentModal = document.getElementById('pivotListModal');
+            if (currentModal && currentModal.style.display === 'flex' && window._summaryModalRenderId === renderToken) {
+                showSummaryStaffDetails(staffName, metricType, renderToken, true);
+            }
+        }).catch(() => {});
+    }
 }
 
 function showSummaryDayDetails(staffName, dayNum) {
+    window._summaryModalRenderId = (window._summaryModalRenderId || 0) + 1;
+
     const dataset = pivotDaLamFilteredData || pivotDaLamRawData;
     if (!dataset) return;
     
@@ -1574,6 +1882,22 @@ function showSummaryDayDetails(staffName, dayNum) {
     const bodyEl = document.getElementById('pivotListModalBody');
     if (!bodyEl) return;
     bodyEl.innerHTML = '';
+
+    const dailyRecords = getDailyChamCongRecordsSync();
+    const att = dailyRecords ? lookupStaffDayAttendance(dailyRecords, staffName, dayNum) : null;
+    if (att) {
+        const strip = document.createElement('div');
+        strip.className = 'summary-day-attendance-strip';
+        const clockText = (att.inTime && att.outTime && !(att.inTime === '0:00' && att.outTime === '0:00'))
+            ? `Vào <b>${escapePivotHtml(att.inTime)}</b> - Ra <b>${escapePivotHtml(att.outTime)}</b>${att.totalTime && att.totalTime !== '0:00' ? ` (${escapePivotHtml(att.totalTime)})` : ''}`
+            : 'Không có dữ liệu giờ In/Out';
+        const tooltip = escapePivotHtml(buildDailyAttendanceTooltip(att));
+        strip.innerHTML = `
+            <span>🗓️ ${att.thu ? escapePivotHtml(att.thu) + ' · ' : ''}${clockText}</span>
+            <span class="summary-cong-badge ${att.meta.badgeClass}"${tooltip ? ` title="${tooltip}"` : ''}>${escapePivotHtml(att.meta.label)}</span>
+        `;
+        bodyEl.appendChild(strip);
+    }
     
     window.pivotDetailList = dayRecords;
     
@@ -1612,6 +1936,7 @@ function showSummaryDayDetails(staffName, dayNum) {
 }
 
 function showPivotDaLamCellDetails(el) {
+    window._summaryModalRenderId = (window._summaryModalRenderId || 0) + 1;
     const valStr = el.innerText.trim();
     if (valStr === '0' || valStr === '-' || valStr === '') return;
     

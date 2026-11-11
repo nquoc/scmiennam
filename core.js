@@ -379,6 +379,7 @@ function closeModal() {
 }
 
 function closePivotListModal() {
+    window._summaryModalRenderId = (window._summaryModalRenderId || 0) + 1;
     document.getElementById('pivotListModal').style.display = 'none';
 }
 
@@ -389,6 +390,7 @@ window.onclick = function(event) {
         modal.style.display = "none";
     }
     if (event.target == listModal) {
+        window._summaryModalRenderId = (window._summaryModalRenderId || 0) + 1;
         listModal.style.display = "none";
     }
 }
@@ -430,6 +432,8 @@ function forceRefreshData() {
     
     // Reset bộ nhớ cache trong biến js
     cacheData = { 'data': null, 'atcdalam': null, 'thongke': null, 'hieusuat': null, 'ngaycong': null, 'kpi': null };
+    window._pivotDailyChamCongRecords = null;
+    window._dailyChamCongFetchPromise = null;
     
     // Tải lại dữ liệu cho tab hiện tại
     let tabName = currentTab;
