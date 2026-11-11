@@ -13,7 +13,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" href="style.css?v=20261103_01">
+    <link rel="stylesheet" href="style.css?v=20261111_01">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         if (localStorage.getItem('theme') === 'dark') {
@@ -370,8 +370,9 @@
 
             <!-- Summary Performance Table Section -->
             <div class="pivot-result-wrapper" style="margin-bottom: 30px;">
-                <h3 style="color:#1e293b; font-size:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color:#1e293b; font-size:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                     <span>📊 Bảng tổng hợp hiệu suất nhân sự theo Ngày công</span>
+                    <span style="font-size:11.5px; font-weight:600; color:#059669; background:rgba(16,185,129,0.1); padding:3px 10px; border-radius:999px; border:1px solid rgba(16,185,129,0.25);">📅 Tính từ ngày 01 (đã trừ công 26-31 tháng trước)</span>
                 </h3>
                 <div class="table-responsive" style="border: 1px solid #e2e8f0; border-radius: 8px;">
                     <table id="summaryPerformanceTable" class="pivot-table">
@@ -633,16 +634,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="utils.js?v=20261103_01"></script>
-    <script src="core.js?v=20261103_01"></script>
-    <script src="tab-tra-cuu.js?v=20261103_01"></script>
-    <script src="tab-pivot-treo.js?v=20261103_01"></script>
-    <script src="tab-pivot-da-lam.js?v=20261103_01"></script>
-    <script src="tab-thong-ke.js?v=20261103_01"></script>
-    <script src="tab-ai.js?v=20261103_01"></script>
-    <script src="tab-leader.js?v=20261103_01"></script>
-    <script src="tab-bao-cao.js?v=20261103_01"></script>
-    <script src="tab-cham-cong.js?v=20261103_01"></script>
+    <script src="utils.js?v=20261111_01"></script>
+    <script src="core.js?v=20261111_01"></script>
+    <script src="tab-tra-cuu.js?v=20261111_01"></script>
+    <script src="tab-pivot-treo.js?v=20261111_01"></script>
+    <script src="tab-pivot-da-lam.js?v=20261111_01"></script>
+    <script src="tab-thong-ke.js?v=20261111_01"></script>
+    <script src="tab-ai.js?v=20261111_01"></script>
+    <script src="tab-leader.js?v=20261111_01"></script>
+    <script src="tab-bao-cao.js?v=20261111_01"></script>
+    <script src="tab-cham-cong.js?v=20261111_01"></script>
     <!-- ============ LEADER TAB ============ -->
     <div id="leaderTabContent" class="tab-content hidden">
         <div class="ldr-header-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px; background:var(--card-bg, #1e293b); padding:14px 20px; border-radius:12px; border:1px solid var(--border-color, #334155);">

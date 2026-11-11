@@ -37,10 +37,10 @@ var summarySortColumn = null;
 var summarySortDirection = 'asc';
 
 window.onload = function() {
-    // Tự động dọn sạch cache rác ngaycong rỗng nếu có trong session
+    // Tự động dọn sạch cache rác hoặc ngaycong cũ (chưa có nguồn B524:H541) nếu có trong session
     try {
         const rawNC = sessionStorage.getItem('crm_dashboard_cache_v2_ngaycong');
-        if (rawNC && (rawNC.includes('"data":[]') || rawNC.includes('"data": []'))) {
+        if (rawNC && (rawNC.includes('"data":[]') || rawNC.includes('"data": []') || !rawNC.includes('B524:H541'))) {
             sessionStorage.removeItem('crm_dashboard_cache_v2_ngaycong');
         }
     } catch(e) {}
@@ -103,21 +103,24 @@ function switchTab(tabName) {
         if (document.getElementById('pivotDaLamWorkspace')) document.getElementById('pivotDaLamWorkspace').classList.remove('hidden');
         if (document.getElementById('aiAnalysisPivotDaLamContainer')) document.getElementById('aiAnalysisPivotDaLamContainer').classList.remove('hidden');
         
-        if (!cacheData['ngaycong'] || (Array.isArray(cacheData['ngaycong']) && cacheData['ngaycong'].length === 0)) {
+        const hasValidNovNC = typeof isValidNovNgayCongList === 'function'
+            ? isValidNovNgayCongList(cacheData['ngaycong'])
+            : (cacheData['ngaycong'] && Array.isArray(cacheData['ngaycong']) && cacheData['ngaycong'].length > 0 && !cacheData['ngaycong'][0]?._isFallback);
+
+        if (!hasValidNovNC) {
             const cachedNC = getFromSessionCache('ngaycong');
-            if (cachedNC && Array.isArray(cachedNC) && cachedNC.length > 0) {
-                cacheData['ngaycong'] = typeof normalizeNgayCongData === 'function' ? normalizeNgayCongData(cachedNC) : cachedNC;
-            } else if (typeof DEFAULT_ATTENDANCE_B502_O519 !== 'undefined') {
-                cacheData['ngaycong'] = DEFAULT_ATTENDANCE_B502_O519;
-            }
+            const normNC = (cachedNC && Array.isArray(cachedNC) && cachedNC.length > 0)
+                ? (typeof normalizeNgayCongData === 'function' ? normalizeNgayCongData(cachedNC) : cachedNC)
+                : null;
+            cacheData['ngaycong'] = (normNC && (typeof isValidNovNgayCongList !== 'function' || isValidNovNgayCongList(normNC))) ? normNC : null;
         }
         
-        if (cacheData['hieusuat'] && cacheData['ngaycong'] && Array.isArray(cacheData['ngaycong']) && cacheData['ngaycong'].length > 0) {
+        if (cacheData['hieusuat'] && cacheData['ngaycong'] && Array.isArray(cacheData['ngaycong']) && cacheData['ngaycong'].length > 0 && !cacheData['ngaycong'][0]?._isFallback) {
             if (typeof onPivotDaLamDataLoaded === 'function') onPivotDaLamDataLoaded(cacheData['hieusuat']);
         } else {
             const cachedHieuSuat = getFromSessionCache('hieusuat');
-            const cachedNgayCong = getFromSessionCache('ngaycong');
-            if (cachedHieuSuat && cachedNgayCong && Array.isArray(cachedNgayCong) && cachedNgayCong.length > 0) {
+            const cachedNgayCong = cacheData['ngaycong'] || getFromSessionCache('ngaycong');
+            if (cachedHieuSuat && cachedNgayCong && Array.isArray(cachedNgayCong) && cachedNgayCong.length > 0 && (typeof isValidNovNgayCongList !== 'function' || isValidNovNgayCongList(cachedNgayCong))) {
                 cacheData['hieusuat'] = cachedHieuSuat;
                 cacheData['ngaycong'] = typeof normalizeNgayCongData === 'function' ? normalizeNgayCongData(cachedNgayCong) : cachedNgayCong;
                 if (typeof onPivotDaLamDataLoaded === 'function') onPivotDaLamDataLoaded(cachedHieuSuat);
@@ -426,7 +429,7 @@ function forceRefreshData() {
     }
     
     // Reset bộ nhớ cache trong biến js
-    cacheData = { 'data': null, 'atcdalam': null, 'thongke': null, 'hieusuat': null, 'ngaycong': null };
+    cacheData = { 'data': null, 'atcdalam': null, 'thongke': null, 'hieusuat': null, 'ngaycong': null, 'kpi': null };
     
     // Tải lại dữ liệu cho tab hiện tại
     let tabName = currentTab;
@@ -441,9 +444,19 @@ function forceRefreshData() {
         }, 800);
     };
 
-    if (tabName === 'pivotdalam') {
+    if (tabName === 'pivotdalam' || tabName === 'leader') {
         if (typeof fetchPivotDaLamData === 'function') {
             fetchPivotDaLamData();
+        }
+        restoreBtn();
+    } else if (tabName === 'baocao') {
+        if (typeof generateWeeklyReport === 'function') {
+            generateWeeklyReport();
+        }
+        restoreBtn();
+    } else if (tabName === 'chamcong') {
+        if (typeof fetchChamCongData === 'function') {
+            fetchChamCongData();
         }
         restoreBtn();
     } else {

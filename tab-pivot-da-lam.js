@@ -2,74 +2,49 @@
 let staffTotalActiveDaysMap = {};
 let staffFilteredActiveDaysMap = {};
 
-// Danh sách nhân sự mặc định từ Sheet 'Chi tiết công MN (Tỉnh & HCM)'!B502:O519 phòng hờ mạng lỗi
+// Danh sách nhân sự mặc định từ Sheet 'Chi tiết công MN (Tỉnh & HCM)'!B524:H541 (Từ ngày 01) phòng hờ mạng lỗi
 const DEFAULT_ATTENDANCE_B502_O519 = [
-    { 'Tên NS': '8458 - Đặng Duy Khương - Customer Success - CTO', 'Mã NV': 'CT00464', 'T công': 3.5, 'Tổng ATC': 29, 'Tổng Điểm': 111, 'Tổng Impact': 22 },
-    { 'Tên NS': '8466 - Lê Cao Minh Đức - Customer Success - CTO', 'Mã NV': 'CT00475', 'T công': 5.0, 'Tổng ATC': 39, 'Tổng Điểm': 63, 'Tổng Impact': 18 },
-    { 'Tên NS': '8470 - Lương Trọng Đạo - Customer Success - CTO', 'Mã NV': 'CT00474', 'T công': 5.0, 'Tổng ATC': 32, 'Tổng Điểm': 110, 'Tổng Impact': 23 },
-    { 'Tên NS': '8460 - Lê Minh Hiển - Customer Success - CTO', 'Mã NV': 'CT00470', 'T công': 3.0, 'Tổng ATC': 36, 'Tổng Điểm': 73, 'Tổng Impact': 21 },
-    { 'Tên NS': '8461 - Trịnh Đức Phong - Customer Success - LĐG', 'Mã NV': 'LĐ00144', 'T công': 6.0, 'Tổng ATC': 49, 'Tổng Điểm': 54, 'Tổng Impact': 22 },
-    { 'Tên NS': '8489 - Nguyễn Hà Anh Vũ - Customer Success - LĐG', 'Mã NV': 'LĐ00158', 'T công': 6.0, 'Tổng ATC': 51, 'Tổng Điểm': 90, 'Tổng Impact': 22 },
-    { 'Tên NS': '8178 - Phan Ngọc Nguyên - Customer Success - BĐH', 'Mã NV': 'ĐN00286', 'T công': 5.5, 'Tổng ATC': 52, 'Tổng Điểm': 109, 'Tổng Impact': 36 },
-    { 'Tên NS': '8469 - Nguyễn Hưng Hải - Customer Success - GLI', 'Mã NV': 'GL00146', 'T công': 5.0, 'Tổng ATC': 55, 'Tổng Điểm': 68, 'Tổng Impact': 35 },
-    { 'Tên NS': '8484 - Trần Thanh Nam - Customer Success - VTU', 'Mã NV': 'VT00157', 'T công': 5.0, 'Tổng ATC': 37, 'Tổng Điểm': 43, 'Tổng Impact': 14 },
-    { 'Tên NS': '8467 - Nguyễn Thành Đạt - Customer Success', 'Mã NV': 'SG02817', 'T công': 4.5, 'Tổng ATC': 37, 'Tổng Điểm': 27, 'Tổng Impact': 6 },
-    { 'Tên NS': '8440 - Doãn Việt Tùng - Customer Success - SGN', 'Mã NV': 'SG02390', 'T công': 4.5, 'Tổng ATC': 37, 'Tổng Điểm': 47, 'Tổng Impact': 14 },
-    { 'Tên NS': '8447 - Võ Khánh Duy - Customer Success - SGN', 'Mã NV': 'SG02388', 'T công': 5.5, 'Tổng ATC': 39, 'Tổng Điểm': 87, 'Tổng Impact': 10 },
-    { 'Tên NS': '8437 - Nguyễn Đoàn Hưng Phát - Customer Success - SGN', 'Mã NV': 'SG02379', 'T công': 4.5, 'Tổng ATC': 44, 'Tổng Điểm': 84, 'Tổng Impact': 21 },
-    { 'Tên NS': '8231 - Thượng Thái Hiếu - Customer Success - SGN', 'Mã NV': 'SG01485', 'T công': 5.5, 'Tổng ATC': 36, 'Tổng Điểm': 95, 'Tổng Impact': 20 },
-    { 'Tên NS': '8448 - Nguyễn Đỗ Nhật Minh - Customer Success', 'Mã NV': 'SG02818', 'T công': 5.5, 'Tổng ATC': 40, 'Tổng Điểm': 65, 'Tổng Impact': 20 },
-    { 'Tên NS': '8462 - Nguyễn Hoàng Khang - Customer Success', 'Mã NV': 'SG02829', 'T công': 5.0, 'Tổng ATC': 48, 'Tổng Điểm': 67, 'Tổng Impact': 16 }
+    { 'Tên NS': '8458 - Đặng Duy Khương - Customer Success - CTO', 'Mã NV': 'CT00464', 'T công': 7.0, _isFallback: true },
+    { 'Tên NS': '8466 - Lê Cao Minh Đức - Customer Success - CTO', 'Mã NV': 'CT00475', 'T công': 7.5, _isFallback: true },
+    { 'Tên NS': '8470 - Lương Trọng Đạo - Customer Success - CTO', 'Mã NV': 'CT00474', 'T công': 6.5, _isFallback: true },
+    { 'Tên NS': '8460 - Lê Minh Hiển - Customer Success - CTO', 'Mã NV': 'CT00470', 'T công': 7.0, _isFallback: true },
+    { 'Tên NS': '8461 - Trịnh Đức Phong - Customer Success - LĐG', 'Mã NV': 'LĐ00144', 'T công': 7.0, _isFallback: true },
+    { 'Tên NS': '8489 - Nguyễn Hà Anh Vũ - Customer Success - LĐG', 'Mã NV': 'LĐ00158', 'T công': 6.0, _isFallback: true },
+    { 'Tên NS': '8178 - Phan Ngọc Nguyên - Customer Success - BĐH', 'Mã NV': 'ĐN00286', 'T công': 6.0, _isFallback: true },
+    { 'Tên NS': '8469 - Nguyễn Hưng Hải - Customer Success - GLI', 'Mã NV': 'GL00146', 'T công': 6.5, _isFallback: true },
+    { 'Tên NS': '8484 - Trần Thanh Nam - Customer Success - VTU', 'Mã NV': 'VT00157', 'T công': 5.0, _isFallback: true },
+    { 'Tên NS': '8467 - Nguyễn Thành Đạt - Customer Success', 'Mã NV': 'SG02817', 'T công': 5.5, _isFallback: true },
+    { 'Tên NS': '8440 - Doãn Việt Tùng - Customer Success - SGN', 'Mã NV': 'SG02390', 'T công': 7.0, _isFallback: true },
+    { 'Tên NS': '8447 - Võ Khánh Duy - Customer Success - SGN', 'Mã NV': 'SG02388', 'T công': 7.0, _isFallback: true },
+    { 'Tên NS': '8437 - Nguyễn Đoàn Hưng Phát - Customer Success - SGN', 'Mã NV': 'SG02379', 'T công': 4.5, _isFallback: true },
+    { 'Tên NS': '8231 - Thượng Thái Hiếu - Customer Success - SGN', 'Mã NV': 'SG01485', 'T công': 7.0, _isFallback: true },
+    { 'Tên NS': '8448 - Nguyễn Đỗ Nhật Minh - Customer Success', 'Mã NV': 'SG02818', 'T công': 6.5, _isFallback: true },
+    { 'Tên NS': '8462 - Nguyễn Hoàng Khang - Customer Success', 'Mã NV': 'SG02829', 'T công': 7.0, _isFallback: true }
 ];
 
+function isValidNovNgayCongList(list) {
+    return Array.isArray(list) && list.length > 0 && !list[0]?._isFallback && list[0]?._sourceRange === 'B524:H541';
+}
+
 async function fetchAttendanceDataForPivot() {
-    // 1. Kiểm tra cacheData / sessionCache trước
-    if (cacheData['ngaycong'] && Array.isArray(cacheData['ngaycong']) && cacheData['ngaycong'].length > 0) {
+    // 1. Kiểm tra cacheData / sessionCache trước (chỉ dùng nếu là dữ liệu B524:H541 thật)
+    if (isValidNovNgayCongList(cacheData['ngaycong'])) {
         return cacheData['ngaycong'];
     }
     if (typeof getFromSessionCache === 'function') {
         const sCached = getFromSessionCache('ngaycong');
-        if (sCached && Array.isArray(sCached) && sCached.length > 0) {
+        if (isValidNovNgayCongList(sCached)) {
             return sCached;
         }
     }
 
-    // 2. Thử Local Server nếu đang chạy
-    try {
-        const localRes = await fetch('http://localhost:3001/api/chamcong/monthly');
-        if (localRes.ok) {
-            const json = await localRes.json();
-            if (json.status === 'success' && Array.isArray(json.data) && json.data.length >= 2) {
-                const list = [];
-                for (let i = 1; i < json.data.length; i++) {
-                    const r = json.data[i];
-                    if (r && r[0] && r[0] !== 'TỔNG CỘNG') {
-                        list.push({
-                            'Tên NS': r[0],
-                            'Họ và tên': r[0],
-                            'Mã NV': r[1] || '',
-                            'T công': parseFloat(r[2]) || 0,
-                            'T phép': parseFloat(r[3]) || 0,
-                            'T OFF': parseFloat(r[4]) || 0,
-                            'Tổng ATC': parseFloat(r[8]) || 0,
-                            'Tổng giờ làm': parseFloat(r[9]) || 0,
-                            'Tổng Điểm': parseFloat(r[10]) || 0,
-                            'Tổng Impact': parseFloat(r[12]) || 0
-                        });
-                    }
-                }
-                if (list.length > 0) return list;
-            }
-        }
-    } catch (e) {}
-
-    // 3. Thử Google Sheets API trực tiếp bằng Service Account Token (Chạy trên GitHub Pages không cần server)
+    // 2. Lấy trực tiếp B524:H541 (Ngày công tính hiệu suất từ ngày 01) qua Google Sheets API
     if (typeof getDirectAccessToken === 'function') {
         try {
             const token = await getDirectAccessToken();
             const sId = typeof SPREADSHEET_ID !== 'undefined' ? SPREADSHEET_ID : '1mEuMm3Pntsn3HenWQ33aNlRG50W9daVM5HjrV9pmxY8';
             const tSheet = typeof TARGET_SHEET !== 'undefined' ? TARGET_SHEET : 'Chi tiết công MN (Tỉnh & HCM)';
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sId}/values/'${encodeURIComponent(tSheet)}'!B502:O519`;
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sId}/values/'${encodeURIComponent(tSheet)}'!B524:H541`;
             const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -80,33 +55,32 @@ async function fetchAttendanceDataForPivot() {
                     const list = [];
                     for (let i = 1; i < rows.length; i++) {
                         const r = rows[i];
-                        if (r && r[0] && r[0] !== 'TỔNG CỘNG') {
+                        const staffName = r && r[0] ? String(r[0]).trim() : '';
+                        if (staffName && staffName !== 'TỔNG CỘNG' && staffName !== 'Tên NS') {
                             list.push({
-                                'Tên NS': r[0],
-                                'Họ và tên': r[0],
+                                'Tên NS': staffName,
+                                'Họ và tên': staffName,
                                 'Mã NV': r[1] || '',
                                 'T công': parseFloat(r[2]) || 0,
-                                'T phép': parseFloat(r[3]) || 0,
-                                'T OFF': parseFloat(r[4]) || 0,
-                                'Tổng ATC': parseFloat(r[8]) || 0,
-                                'Tổng giờ làm': parseFloat(r[9]) || 0,
-                                'Tổng Điểm': parseFloat(r[10]) || 0,
-                                'Tổng Impact': parseFloat(r[12]) || 0
+                                'Công 26-31': parseFloat(r[3]) || 0,
+                                'Công cả chu kỳ': parseFloat(r[4]) || 0,
+                                'T phép': parseFloat(r[5]) || 0,
+                                'T OFF': parseFloat(r[6]) || 0,
+                                _sourceRange: 'B524:H541'
                             });
                         }
                     }
                     if (list.length > 0) {
-                        window.chamCongMonthlyData = rows;
                         return list;
                     }
                 }
             }
         } catch (e) {
-            console.warn("Direct Sheets API fetch warning:", e);
+            console.warn("Direct Sheets API B524:H541 fetch warning:", e);
         }
     }
 
-    // 4. Thử Google Apps Script API_URL + "?sheet=ngaycong"
+    // 3. Thử Google Apps Script API_URL + "?sheet=ngaycong" nếu fallback cần dùng
     try {
         const gasRes = await fetch(API_URL + "?sheet=ngaycong");
         if (gasRes.ok) {
@@ -117,7 +91,7 @@ async function fetchAttendanceDataForPivot() {
         }
     } catch (e) {}
 
-    // 5. Trả về danh sách mặc định B502:O519 để đảm bảo luôn hiển thị đầy đủ
+    // 4. Trả về danh sách mặc định B524:H541 phòng hờ mất kết nối
     return DEFAULT_ATTENDANCE_B502_O519;
 }
 
@@ -148,7 +122,9 @@ async function fetchPivotDaLamData() {
 
         if (attendanceData && Array.isArray(attendanceData) && attendanceData.length > 0) {
             cacheData['ngaycong'] = attendanceData;
-            if (typeof saveToSessionCache === 'function') saveToSessionCache('ngaycong', attendanceData);
+            if (typeof saveToSessionCache === 'function' && !attendanceData[0]?._isFallback) {
+                saveToSessionCache('ngaycong', attendanceData);
+            }
         } else if (!cacheData['ngaycong'] || cacheData['ngaycong'].length === 0) {
             cacheData['ngaycong'] = DEFAULT_ATTENDANCE_B502_O519;
         }
@@ -623,7 +599,7 @@ function getEstimatedWorkday(staff) {
         });
         return totalCong > 0 ? totalCong : ((staffFilteredActiveDaysMap[staff] && staffFilteredActiveDaysMap[staff].size) || 0);
     } else {
-        // --- SUMMARY FORMAT (B502:O519) ---
+        // --- SUMMARY FORMAT (B524:H541 - Từ ngày 01) ---
         let tCongOriginal = 0;
         const ncRow = list.find(row => {
             let name = String(row['Tên NS'] || row['Họ và tên'] || row['staff'] || '');
@@ -1265,7 +1241,7 @@ function renderSummaryPerformanceTable(filteredData) {
         ? cacheData['ngaycong']
         : DEFAULT_ATTENDANCE_B502_O519;
     
-    // 1. Thêm nhân sự từ danh sách ngày công (B502:O519 hoặc chấm công chi tiết)
+    // 1. Thêm nhân sự từ danh sách ngày công (B524:H541 hoặc chấm công chi tiết)
     ncList.forEach((ncRow, idx) => {
         const rawName = String(ncRow['Tên NS'] || ncRow['Họ và tên'] || ncRow['staff'] || '').trim();
         if (!rawName || rawName === 'TỔNG CỘNG' || rawName === 'Tên NS') return;

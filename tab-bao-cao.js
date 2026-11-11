@@ -194,15 +194,30 @@ function wrNumPick(row, aliases, fallback = 0) {
 
 async function wrFetchSheet(tabName) {
     if (cacheData && cacheData[tabName] && Array.isArray(cacheData[tabName]) && cacheData[tabName].length) {
-        return cacheData[tabName];
+        if (tabName !== 'ngaycong' || (cacheData[tabName][0]?._sourceRange === 'B524:H541' && !cacheData[tabName][0]?._isFallback)) {
+            return cacheData[tabName];
+        }
     }
 
     const cached = typeof getFromSessionCache === 'function' ? getFromSessionCache(tabName) : null;
     if (cached && Array.isArray(cached) && cached.length) {
-        cacheData[tabName] = tabName === 'ngaycong' && typeof normalizeNgayCongData === 'function'
-            ? normalizeNgayCongData(cached)
-            : cached;
-        return cacheData[tabName];
+        if (tabName !== 'ngaycong' || (cached[0]?._sourceRange === 'B524:H541' && !cached[0]?._isFallback)) {
+            cacheData[tabName] = tabName === 'ngaycong' && typeof normalizeNgayCongData === 'function'
+                ? normalizeNgayCongData(cached)
+                : cached;
+            return cacheData[tabName];
+        }
+    }
+
+    if (tabName === 'ngaycong' && typeof fetchAttendanceDataForPivot === 'function') {
+        const data = await fetchAttendanceDataForPivot();
+        if (Array.isArray(data) && data.length > 0) {
+            cacheData['ngaycong'] = data;
+            if (typeof saveToSessionCache === 'function' && !data[0]?._isFallback) {
+                saveToSessionCache('ngaycong', data);
+            }
+            return data;
+        }
     }
 
     let fetchUrl = API_URL + '?sheet=' + (tabName === 'kpi' ? 'KPI' : tabName);
