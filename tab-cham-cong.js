@@ -1,12 +1,57 @@
 // --- TAB CHẤM CÔNG SC (TRỰC TIẾP TRÊN TRÌNH DUYỆT WEB APP / MOBILE RESPONSIVE UI) ---
 
-const SA_CONFIG = {
-    client_email: "bot-sheet@confident-slice-495215-s4.iam.gserviceaccount.com",
-    private_key: (function() {
-        const b64 = "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2UUlCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktjd2dnU2pBZ0VBQW9JQkFRRFE2YUI1RkJhaS9hTlgKOVFzNVliSU82UlNadGgvbzZhQ0F6bitNTitSVGlDYU01bXR4L2QrdnA4SHRhMzBZT2lCOE5tZVIxQVBsQ085MApoQUVVdlNlV1JsdHF4Tkl6aG85UVpZSktDT2VkcitrZXpZTWl3TWd1ZmZ3YkZzM1YxQk9VSU9OMzNDNHBldUtPClZxRG5Wb2EwM1F3c2lLbEI2Y3NMTHZjYmJtNncxVC9JOVV4SElOQzV4OEFGSjdBakVNUEtWNHNNWGNDWTEwUVMKUEVNSHNNNUc4d0w3bHE2S1RQanJuNy84TkFRbVcyYVJvMHdDS0VWRW9sOTlTYTZRMThoU2hQcVdyV01sb0hWcwpRVDUwRk9UUS9oN1ZHRHFoRkhwOXcxWWVzL0U1T1YwSGZCSEIyZFlxQkU1S1dBU0JLazQxbE5qeDJnUzN1UWdBCjdwM0Y3UUpwQWdNQkFBRUNnZ0VBR1VvTXYxZHhrWSs1WGlDSFdDNEZ3VlVSQmJYMHFTdmQzblhRM2hzV2VFK3AKRmdHZkpGU09oMHVjRjhiZEpPbUZiTy9qaS9WQnR2QWsxNEtTeEcxTTdWMnRPNUNobnZQbEpaN3lIWTcwSmNRcAppTTFwT0ZQa3I2OFh6WG91VnRvR09EWmVmdEFRSlB5UGtCbzN2bVZjcDJpQ1RLSks5ZlFNbkprVjkvTy9jY2VZCnNoVDBrR0RoYklGNkxBclBOdnEya25Fd2I1OEJnRDdrNTBGNmJjSGVEdW1vcDZ3Y08xVWhBMzdPQnN0S3JUdlkKZXhSZEh4Q253Y3NiQXh0ZHlIR0toeXhLZWlBMHBPMkV2SExrM1hobDRvQVhNblJmZ0k5L0hOWVQ1WGp6eVNPNQorNlUrWEFSb1lGclBoV3A0aXQ2Z2tQZ203MnlJRzUybi9EaXdwSGI2RVFLQmdRRHpTeFhMRmkvVVMzM25aYmloCmJtV1lmdlhxeVA0QUJKeDJJTS9BVCs2YnZzRWRoTVBzbkZLZzNEV045TTJmRzA1c2ZyYUUrRW1yclRtVnQzMzIKTWo3MTArcHgwYWdYajFUSmpBRkwyQ1Zhdi9DbVlqdkZaV0g5bHEvK3cwZ1VMdWp2TG1CZlN1eWdodkIxUmROYgpaeVR2YnlzTXdVWkg3U1JQTUVtWHlMUDhXUUtCZ1FEYjB0d3FCczNnUUhRemc5OTFFYWxRNkI5U1hVL1pFQmk5CmNOcFg2ZTVTb1YrbnYyRUlrMlpucEZwZTliNGtkTnJwdllPN2M4eUMwY2FibE1hQ0lMeERKbC9weXRQREdSNnkKRVk5dmhaR3FpbEcvc2xQVllFSDdQSEhGc0x5WWRFT2ZYVk41Tmg1S0o4OFhVVGFUV1g4RmVlemZUWEJDMEpVZApMTHZqNDJFMGtRS0JnUURNZkNCdUdGRE5BMEpvT2VQcnN1a3JPaEtoYXB1cUVqWWJSMHEySGJpMEtLa1JrV1JICk84QnJPWXE5ckxNaWRvWDh4S2ZOclEzbWdHcjAva3Vkb08rd0dKUmxZOHovT0ZZUUxGOXVpdFlpcDA2eDJjRFoKRVhSQit1UWpvYWkwWmhVYjZ3UFBOQjhjY1M0cnN5dUpHSEUvMlZUNm5Idmd1bDJaUFVHdGxHQkt5UUtCZ0ZYRQpSWVpZTlVkRG5wTGk1dktrTzIySHc0QzlTNFFqVmFQRVBreUN4eXVTTHVJaU4xZkRPdmRCRnNscUZBL2hUL0JXCnN1a1dXenJIWWpnZHFmM25pOHlmVWxqRGZDL293eU15MnNYbVZWazJzb0thcno3WFdhY09oRTFma1pYaDl1aGMKMzA2eG9NdktFSERHalFhY3FvU1dkNmNBYmNhRDMwb014Qm84QXhjaEFvR0FBWW1BYndCQytiaWlKdFZiOERxRwpKMU1ZUlg5UVJkOHJlUERVZGY1N05ISEFIVGwwSG5IdjB4YUgxeTRJQlVraHBJZUwwQURId1NtNDFQSWVxUDFXClNiZkFiWTdkOHBvdksxTC9uRXViUkEyNGVUTHM5VnhNdlZ3WTE0eGQvR2hnM2JkeHJkSUkzMnZqbzE0RUdjNUIKZThERjVWL1ZRc2JZZXdZWGtZZnc4b1U9Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K";
-        return (typeof atob === 'function') ? atob(b64.replace(/\s+/g, '')) : Buffer.from(b64, 'base64').toString('utf-8');
-    })()
-};
+const BOT_CREDENTIALS_URL = "https://script.google.com/macros/s/AKfycbwHmR0xSG4uZrBdyPrv-lypX5qjP1bOC2Ca1_8vY1oRfIAe_LeFnJa7wAWrGzCmPrU/exec?action=getBotCredentials&apiKey=my_secret_token_2026";
+let SA_CONFIG = null;
+let botCredentialsPromise = null;
+
+async function getBotCredentials() {
+    if (SA_CONFIG && SA_CONFIG.client_email && SA_CONFIG.private_key) {
+        return SA_CONFIG;
+    }
+    // Check sessionStorage cache first to speed up page reloads
+    try {
+        const cached = sessionStorage.getItem('crm_bot_credentials_v1');
+        if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed && parsed.client_email && parsed.private_key) {
+                SA_CONFIG = parsed;
+                window.SA_CONFIG = SA_CONFIG;
+                return SA_CONFIG;
+            }
+        }
+    } catch(e) {}
+
+    if (!botCredentialsPromise) {
+        botCredentialsPromise = (async () => {
+            try {
+                const res = await fetch(BOT_CREDENTIALS_URL);
+                if (!res.ok) throw new Error(`Lỗi tải Bot Credentials: HTTP ${res.status}`);
+                const json = await res.json();
+                if (json && json.status === 'success' && json.credentials) {
+                    SA_CONFIG = {
+                        client_email: json.credentials.client_email,
+                        private_key: json.credentials.private_key
+                    };
+                    window.SA_CONFIG = SA_CONFIG;
+                    try {
+                        sessionStorage.setItem('crm_bot_credentials_v1', JSON.stringify(SA_CONFIG));
+                    } catch(e) {}
+                    return SA_CONFIG;
+                } else {
+                    throw new Error((json && json.message) || 'Phản hồi không hợp lệ từ Bot Credentials API');
+                }
+            } finally {
+                botCredentialsPromise = null;
+            }
+        })();
+    }
+    return await botCredentialsPromise;
+}
+
+// Tự động tải trước credentials trong nền để sẵn sàng ngay khi người dùng thao tác
+try {
+    getBotCredentials().catch(err => console.warn('Bot credentials prefetch:', err));
+} catch(e) {}
 const SPREADSHEET_ID = '1mEuMm3Pntsn3HenWQ33aNlRG50W9daVM5HjrV9pmxY8';
 const TARGET_SHEET = 'Chi tiết công MN (Tỉnh & HCM)';
 const LOCAL_API_BASE = 'http://localhost:3001/api/chamcong';
@@ -526,8 +571,10 @@ async function getDirectAccessToken() {
         return directTokenCache.token;
     }
 
+    const saConfig = await getBotCredentials();
+
     function base64UrlEncode(str) {
-        return btoa(str).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+        return btoa(unescape(encodeURIComponent(str))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
     }
 
     function base64UrlEncodeBuffer(buffer) {
@@ -541,7 +588,7 @@ async function getDirectAccessToken() {
 
     const header = { alg: 'RS256', typ: 'JWT' };
     const payload = {
-        iss: SA_CONFIG.client_email,
+        iss: saConfig.client_email,
         scope: 'https://www.googleapis.com/auth/spreadsheets',
         aud: 'https://oauth2.googleapis.com/token',
         exp: now + 3600,
@@ -552,7 +599,7 @@ async function getDirectAccessToken() {
     const encodedPayload = base64UrlEncode(JSON.stringify(payload));
     const unsignedToken = `${encodedHeader}.${encodedPayload}`;
 
-    const pemContents = SA_CONFIG.private_key
+    const pemContents = saConfig.private_key
         .replace(/-----BEGIN PRIVATE KEY-----/g, '')
         .replace(/-----END PRIVATE KEY-----/g, '')
         .replace(/\s+/g, '');
@@ -598,6 +645,7 @@ async function getDirectAccessToken() {
     }
 }
 window.SA_CONFIG = SA_CONFIG;
+window.getBotCredentials = getBotCredentials;
 window.SPREADSHEET_ID = SPREADSHEET_ID;
 window.TARGET_SHEET = TARGET_SHEET;
 window.getDirectAccessToken = getDirectAccessToken;
