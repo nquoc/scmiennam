@@ -2,55 +2,69 @@
 
 const BOT_CREDENTIALS_URL = "https://script.google.com/macros/s/AKfycbwHmR0xSG4uZrBdyPrv-lypX5qjP1bOC2Ca1_8vY1oRfIAe_LeFnJa7wAWrGzCmPrU/exec?action=getBotCredentials&apiKey=my_secret_token_2026";
 let SA_CONFIG = null;
-let botCredentialsPromise = null;
+let botAuthPromise = null;
 
-async function getBotCredentials() {
+async function getBotAuthData() {
     if (SA_CONFIG && SA_CONFIG.client_email && SA_CONFIG.private_key) {
         return SA_CONFIG;
     }
     // Check sessionStorage cache first to speed up page reloads
     try {
-        const cached = sessionStorage.getItem('crm_bot_credentials_v1');
+        const cached = sessionStorage.getItem('crm_bot_auth_v1');
         if (cached) {
             const parsed = JSON.parse(cached);
-            if (parsed && parsed.client_email && parsed.private_key) {
-                SA_CONFIG = parsed;
-                window.SA_CONFIG = SA_CONFIG;
-                return SA_CONFIG;
+            if (parsed && (parsed.access_token || (parsed.client_email && parsed.private_key))) {
+                if (parsed.client_email) {
+                    SA_CONFIG = parsed;
+                    window.SA_CONFIG = SA_CONFIG;
+                }
+                return parsed;
             }
         }
     } catch(e) {}
 
-    if (!botCredentialsPromise) {
-        botCredentialsPromise = (async () => {
+    if (!botAuthPromise) {
+        botAuthPromise = (async () => {
             try {
                 const res = await fetch(BOT_CREDENTIALS_URL);
-                if (!res.ok) throw new Error(`Lỗi tải Bot Credentials: HTTP ${res.status}`);
+                if (!res.ok) throw new Error(`Lỗi tải Bot Auth: HTTP ${res.status}`);
                 const json = await res.json();
-                if (json && json.status === 'success' && json.credentials) {
-                    SA_CONFIG = {
-                        client_email: json.credentials.client_email,
-                        private_key: json.credentials.private_key
-                    };
-                    window.SA_CONFIG = SA_CONFIG;
-                    try {
-                        sessionStorage.setItem('crm_bot_credentials_v1', JSON.stringify(SA_CONFIG));
-                    } catch(e) {}
-                    return SA_CONFIG;
-                } else {
-                    throw new Error((json && json.message) || 'Phản hồi không hợp lệ từ Bot Credentials API');
+                if (json && json.status === 'success') {
+                    let result = null;
+                    if (json.access_token) {
+                        result = { access_token: json.access_token, expires_in: json.expires_in || 3300 };
+                    } else if (json.credentials) {
+                        result = {
+                            client_email: json.credentials.client_email,
+                            private_key: json.credentials.private_key
+                        };
+                        SA_CONFIG = result;
+                        window.SA_CONFIG = SA_CONFIG;
+                    }
+                    if (result) {
+                        try {
+                            sessionStorage.setItem('crm_bot_auth_v1', JSON.stringify(result));
+                        } catch(e) {}
+                        return result;
+                    }
                 }
+                throw new Error((json && json.message) || 'Phản hồi không hợp lệ từ Bot API');
             } finally {
-                botCredentialsPromise = null;
+                botAuthPromise = null;
             }
         })();
     }
-    return await botCredentialsPromise;
+    return await botAuthPromise;
 }
 
-// Tự động tải trước credentials trong nền để sẵn sàng ngay khi người dùng thao tác
+async function getBotCredentials() {
+    const authData = await getBotAuthData();
+    return authData;
+}
+
+// Tự động tải trước credentials/token trong nền
 try {
-    getBotCredentials().catch(err => console.warn('Bot credentials prefetch:', err));
+    getBotAuthData().catch(err => console.warn('Bot auth prefetch:', err));
 } catch(e) {}
 const SPREADSHEET_ID = '1mEuMm3Pntsn3HenWQ33aNlRG50W9daVM5HjrV9pmxY8';
 const TARGET_SHEET = 'Chi tiết công MN (Tỉnh & HCM)';
@@ -572,6 +586,11 @@ async function getDirectAccessToken() {
     }
 
     const saConfig = await getBotCredentials();
+    if (saConfig && saConfig.access_token) {
+        directTokenCache.token = saConfig.access_token;
+        directTokenCache.expiresAt = now + (saConfig.expires_in || 3300);
+        return saConfig.access_token;
+    }
 
     function base64UrlEncode(str) {
         return btoa(unescape(encodeURIComponent(str))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
