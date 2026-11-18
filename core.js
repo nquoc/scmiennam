@@ -43,6 +43,10 @@ window.onload = function() {
         if (rawNC && (rawNC.includes('"data":[]') || rawNC.includes('"data": []') || !rawNC.includes('B524:H541'))) {
             sessionStorage.removeItem('crm_dashboard_cache_v2_ngaycong');
         }
+        if (sessionStorage.getItem('crm_kpi_range_v') !== 'A21:O37') {
+            sessionStorage.removeItem('crm_dashboard_cache_v2_kpi');
+            sessionStorage.setItem('crm_kpi_range_v', 'A21:O37');
+        }
     } catch(e) {}
     switchTab('pivotdalam');
     // Chạy ngầm tải trước các tab khác sau 1.5 giây để tránh làm chậm lần đầu load trang
@@ -186,7 +190,7 @@ function fetchData(tabName) {
     if (tabName === 'thongke') {
         fetchUrl += "&range=K3:AQ11";
     } else if (tabName === 'kpi') {
-        fetchUrl += "&range=A16:O27";
+        fetchUrl += "&range=A21:O37";
     }
     
     fetch(fetchUrl)
@@ -467,9 +471,11 @@ function forceRefreshData() {
         document.getElementById('loading').style.display = 'block';
         document.getElementById('loading').innerText = "⏳ ĐANG LÀM MỚI VÀ KẾT NỐI DATABASE...";
         
-        let fetchUrl = API_URL + "?sheet=" + tabName;
+        let fetchUrl = API_URL + "?sheet=" + (tabName === 'kpi' ? 'KPI' : tabName);
         if (tabName === 'thongke') {
             fetchUrl += "&range=K3:AQ11";
+        } else if (tabName === 'kpi') {
+            fetchUrl += "&range=A21:O37";
         }
         
         fetch(fetchUrl)

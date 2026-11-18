@@ -298,7 +298,7 @@ function prefetchTabsBackground() {
         if (tabName === 'thongke') {
             fetchUrl += "&range=K3:AQ11";
         } else if (tabName === 'kpi') {
-            fetchUrl += "&range=A16:O27";
+            fetchUrl += "&range=A21:O37";
         }
         
         fetch(fetchUrl)

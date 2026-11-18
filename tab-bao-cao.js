@@ -222,7 +222,7 @@ async function wrFetchSheet(tabName) {
 
     let fetchUrl = API_URL + '?sheet=' + (tabName === 'kpi' ? 'KPI' : tabName);
     if (tabName === 'thongke') fetchUrl += '&range=K3:AQ11';
-    if (tabName === 'kpi') fetchUrl += '&range=A16:O27';
+    if (tabName === 'kpi') fetchUrl += '&range=A21:O37';
 
     const response = await fetch(fetchUrl);
     const result = await response.json();
