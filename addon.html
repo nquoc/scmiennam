@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f172a">
+<title>KPI Addon T11 (18/11) — Team Nguyễn Ái Quốc</title>
+<style>
+  :root {
+    --bg: #eef2f6;
+    --card: #ffffff;
+    --soft: #f8fafc;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --blue: #2563eb;
+    --blue-bg: #eff6ff;
+    --green: #15803d;
+    --green-bg: #dcfce7;
+    --amber: #b45309;
+    --amber-bg: #fef3c7;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.45;
+    padding-bottom: 84px;
+  }
+  .app {
+    max-width: 560px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+
+  /* Hero Header */
+  .hero {
+    background: linear-gradient(145deg, #0f172a 0%, #1d4ed8 100%);
+    color: #fff;
+    padding: 20px 16px 22px;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.22);
+  }
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.24);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+  }
+  .hero h1 {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+  }
+  .hero-sub {
+    font-size: 12.5px;
+    color: #cbd5e1;
+    margin-top: 3px;
+  }
+  .hero-score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 16px;
+    margin-bottom: 7px;
+  }
+  .hero-score-big {
+    font-size: 28px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-score-big span { font-size: 15px; font-weight: 600; color: #bfdbfe; }
+  .hero-pct {
+    font-size: 18px;
+    font-weight: 800;
+    background: rgba(255,255,255,0.18);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+  .hero-bar {
+    height: 10px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 999px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4ade80, #22d3ee);
+    border-radius: 999px;
+  }
+  .hero-bar-mark {
+    position: absolute;
+    left: 60%;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.85);
+  }
+  .hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .hero-stat {
+    background: rgba(255,255,255,0.11);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .hero-stat-label { font-size: 11px; color: #cbd5e1; font-weight: 600; }
+  .hero-stat-val { font-size: 16px; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .hero-stat-sub { font-size: 11px; color: #dbeafe; margin-top: 1px; }
+
+  .hero-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .hero-btn {
+    flex: 1;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .hero-btn-white { background: #fff; color: #1e3a8a; }
+  .hero-btn-glass { background: rgba(255,255,255,0.16); color: #fff; border: 1px solid rgba(255,255,255,0.22); }
+  .hero-btn:active { transform: scale(0.98); }
+
+  /* Sticky Controls */
+  .sticky-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(238, 242, 246, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  }
+  .seg-control {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #dbe3ee;
+    padding: 3px;
+    border-radius: 11px;
+    margin-bottom: 10px;
+  }
+  .seg-btn {
+    border: none;
+    background: transparent;
+    padding: 8px 10px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    cursor: pointer;
+  }
+  .seg-btn.active {
+    background: #fff;
+    color: var(--blue);
+    box-shadow: 0 1px 4px rgba(15,23,42,0.1);
+  }
+  .search-box {
+    position: relative;
+    margin-bottom: 9px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 11px 36px 11px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    font-size: 16px; /* prevents iOS zoom */
+    background: #fff;
+    color: var(--text);
+    outline: none;
+  }
+  .search-box input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.14); }
+  .clear-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: #e2e8f0;
+    color: #475569;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    display: none;
+    cursor: pointer;
+  }
+  .clear-btn.show { display: inline-flex; align-items: center; justify-content: center; }
+
+  .chips-scroll {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .chips-scroll::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .chip.active {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+  }
+
+  /* Staff Cards List */
+  .list-wrap {
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+  }
+  .staff-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .staff-card.open {
+    border-color: #93c5fd;
+    box-shadow: 0 4px 16px rgba(37,99,235,0.1);
+  }
+  .card-head {
+    padding: 14px 14px 12px;
+    cursor: pointer;
+  }
+  .card-row1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .card-left {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    min-width: 0;
+  }
+  .rank {
+    flex: 0 0 28px;
+    height: 28px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    background: #f1f5f9;
+    color: #475569;
+    margin-top: 2px;
+  }
+  .rank-top { background: #dcfce7; color: #15803d; }
+  .rank-low { background: #fee2e2; color: #dc2626; }
+  .s-name {
+    font-size: 15.5px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .s-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .card-right {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .s-score {
+    font-size: 17px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .s-score small { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .s-pct {
+    font-size: 12.5px;
+    font-weight: 800;
+    margin-top: 2px;
+  }
+
+  .bar-track {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    position: relative;
+    overflow: hidden;
+    margin: 10px 0 9px;
+  }
+  .bar-fill { height: 100%; border-radius: 999px; }
+  .bar-mark {
+    position: absolute;
+    left: 60%;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(15,23,42,0.35);
+  }
+  .c-green { color: var(--green); }
+  .c-blue { color: var(--blue); }
+  .c-amber { color: var(--amber); }
+  .c-red { color: var(--red); }
+  .bg-green { background: linear-gradient(90deg, #16a34a, #22c55e); }
+  .bg-blue { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+  .bg-amber { background: linear-gradient(90deg, #d97706, #f59e0b); }
+  .bg-red { background: linear-gradient(90deg, #dc2626, #ef4444); }
+
+  .mini-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pill-row { display: flex; flex-wrap: wrap; gap: 5px; }
+  .mpill {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .mp-slate { background: #f1f5f9; color: #334155; }
+  .mp-green { background: var(--green-bg); color: var(--green); }
+  .mp-red { background: var(--red-bg); color: var(--red); }
+  .mp-amber { background: var(--amber-bg); color: var(--amber); }
+
+  .expand-hint {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  /* Expanded Body */
+  .card-body {
+    display: none;
+    background: #f8fafc;
+    border-top: 1px solid var(--border);
+    padding: 12px 14px 14px;
+  }
+  .staff-card.open .card-body { display: block; }
+
+  .sec-title {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 10px 0 7px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sec-title:first-child { margin-top: 0; }
+
+  .case-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    padding: 10px 11px;
+    margin-bottom: 7px;
+  }
+  .case-card.is-bu { border-left: 4px solid #16a34a; }
+  .case-card.is-rec { border-left: 4px solid #f59e0b; }
+  .case-card.is-hard { border-left: 4px solid #dc2626; }
+  .case-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+  .case-type { font-size: 12px; font-weight: 800; }
+  .ret-btn {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+    background: #eef2ff;
+    color: #1e40af;
+    border: 1px solid #c7d2fe;
+    padding: 2px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .ret-btn:active { background: #dbeafe; }
+  .case-detail {
+    font-size: 12.5px;
+    color: #334155;
+    line-height: 1.4;
+  }
+  .case-reason {
+    font-size: 12px;
+    color: #b91c1c;
+    font-weight: 600;
+    margin-top: 3px;
+  }
+  .case-reason.ok-note { color: #15803d; }
+
+  .copy-person-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 11px;
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .copy-person-btn:active { background: #dbeafe; }
+
+  .clean-ok {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .hidden { display: none !important; }
+  .empty {
+    text-align: center;
+    padding: 36px 16px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translate(-50%, 16px);
+    background: #0f172a;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.28);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.22s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hero" id="heroSection"></div>
+
+  <div class="sticky-bar">
+    <div class="seg-control">
+      <button class="seg-btn active" id="segStaff" onclick="switchView('staff')">👥 Theo Nhân Sự (16)</button>
+      <button class="seg-btn" id="segCases" onclick="switchView('cases')">⚠️ Ca Cần Đôn Đốc (<span id="casesCountBadge">0</span>)</button>
+    </div>
+    <div class="search-box">
+      <input type="text" id="qInput" placeholder="🔍 Tìm tên, mã SC, Retailer ID..." oninput="onSearch()">
+      <button class="clear-btn" id="clearBtn" onclick="clearSearch()">✕</button>
+    </div>
+    <div class="chips-scroll" id="filterChips"></div>
+  </div>
+
+  <div class="list-wrap" id="mainList"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = {"staff": [{"code": "8466", "full_name": "8466 - Lê Cao Minh Đức - Customer Success - CTO", "short_name": "Lê Cao Minh Đức", "region": "CTO", "level": "Level 3", "kpi": 60, "self_pts": 65, "bu_hd_pts": 0, "bu_pay_pts": 10, "bu_total": 10, "pay_tru": 5, "hd_tru": 0, "ks_tru": 4, "tru_total": 9, "chot": 66, "pct": 110.0, "diff": 6, "status": "ĐẠT (VƯỢT)", "bu_hd_list": [], "bu_pay_list": [{"ret": "501212418", "act": "109810931", "sc": "22/10/2026", "old_digi": "1 ngày", "new_digi": "14 ngày"}, {"ret": "500398777", "act": "110185893", "sc": "30/10/2026", "old_digi": "2 ngày", "new_digi": "19 ngày"}], "pay_khl_list": [{"ret": "200133606", "act": "110494616", "sc": "07/11/2026", "dk": "07/11/2026", "digi": 3, "reason": "Số ngày digi invoice trong 30D < 5 ngày (3 ngày)", "recoverable": true}], "hd_cx_list": [], "ks_list": [{"ticket": "TT9182767", "ret": "501091384", "status": "Bán hàng", "pts": "1đ", "tru": "-4đ", "reason": "Bán hàng (KH đang tìm hiểu: KH mới sử dụng tính năng; cần quen thao tác)", "recoverable": true}]}, {"code": "8470", "full_name": "8470 - Lương Trọng Đạo - Customer Success - CTO", "short_name": "Lương Trọng Đạo", "region": "CTO", "level": "Level 3", "kpi": 60, "self_pts": 70, "bu_hd_pts": 0, "bu_pay_pts": 0, "bu_total": 0, "pay_tru": 5, "hd_tru": 0, "ks_tru": 5, "tru_total": 10, "chot": 60, "pct": 100.0, "diff": 0, "status": "ĐẠT (100%)", "bu_hd_list": [], "bu_pay_list": [], "pay_khl_list": [{"ret": "501002450", "act": "110868440", "sc": "16/11/2026", "dk": "16/11/2026", "digi": 2, "reason": "Số ngày digi invoice trong 30D < 5 ngày (2 ngày)", "recoverable": true}], "hd_cx_list": [], "ks_list": [{"ticket": "TT9130252", "ret": "500449231", "status": "Thất bại", "pts": "0đ", "tru": "-5đ", "reason": "Thất bại (KH bận - lười dùng; việc cá nhân: KH bận - lười dùng; việc cá nhân)", "recoverable": false}]}, {"code": "8489", "full_name": "8489 - Nguyễn Hà Anh Vũ - Customer Success - LĐG", "short_name": "Nguyễn Hà Anh Vũ", "region": "LĐG", "level": "Level 2", "kpi": 45, "self_pts": 50, "bu_hd_pts": 5, "bu_pay_pts": 5, "bu_total": 10, "pay_tru": 15, "hd_tru": 0, "ks_tru": 0, "tru_total": 15, "chot": 45, "pct": 100.0, "diff": 0, "status": "ĐẠT (100%)", "bu_hd_list": [{"ret": "500912262", "act": "110094766", "sc": "30/10/2026", "ph": "03/11/2026", "diff": "4 ngày", "einv": 1152}], "bu_pay_list": [{"ret": "501226547", "act": "110017827", "sc": "27/10/2026", "old_digi": "1 ngày", "new_digi": "14 ngày"}], "pay_khl_list": [{"ret": "500367720", "act": "110411354", "sc": "05/11/2026", "dk": "05/11/2026", "digi": 0, "reason": "Số ngày digi invoice trong 30D < 5 ngày (0 ngày)", "recoverable": true}, {"ret": "501185846", "act": "110883596", "sc": "16/11/2026", "dk": "10/08/2026", "digi": 30, "reason": "Đã ĐK trước ngày hỗ trợ (10/08/2026)", "recoverable": false}, {"ret": "501235577", "act": "110909883", "sc": "17/11/2026", "dk": "17/11/2026", "digi": 1, "reason": "Số ngày digi invoice trong 30D < 5 ngày (1 ngày)", "recoverable": true}], "hd_cx_list": [], "ks_list": []}, {"code": "8461", "full_name": "8461 - Trịnh Đức Phong - Customer Success - LĐG", "short_name": "Trịnh Đức Phong", "region": "LĐG", "level": "Level 2", "kpi": 45, "self_pts": 30, "bu_hd_pts": 10, "bu_pay_pts": 0, "bu_total": 10, "pay_tru": 5, "hd_tru": 0, "ks_tru": 0, "tru_total": 5, "chot": 35, "pct": 77.8, "diff": -10, "status": "ĐANG THIẾU", "bu_hd_list": [{"ret": "200131297", "act": "110120784", "sc": "29/10/2026", "ph": "11/11/2026", "diff": "13 ngày", "einv": 1}, {"ret": "501231085", "act": "110213096", "sc": "31/10/2026", "ph": "01/11/2026", "diff": "1 ngày", "einv": 123}], "bu_pay_list": [], "pay_khl_list": [{"ret": "501230217", "act": "110604602", "sc": "10/11/2026", "dk": "10/11/2026", "digi": 0, "reason": "Số ngày digi invoice trong 30D < 5 ngày (0 ngày)", "recoverable": true}], "hd_cx_list": [], "ks_list": []}, {"code": "8458", "full_name": "8458 - Đặng Duy Khương - Customer Success - CTO", "short_name": "Đặng Duy Khương", "region": "CTO", "level": "Level 3", "kpi": 60, "self_pts": 70, "bu_hd_pts": 0, "bu_pay_pts": 0, "bu_total": 0, "pay_tru": 10, "hd_tru": 10, "ks_tru": 5, "tru_total": 25, "chot": 45, "pct": 75.0, "diff": -15, "status": "ĐANG THIẾU", "bu_hd_list": [], "bu_pay_list": [], "pay_khl_list": [{"ret": "501231679", "act": "110848686", "sc": "16/11/2026", "dk": "16/11/2026", "digi": 1, "reason": "Số ngày digi invoice trong 30D < 5 ngày (1 ngày)", "recoverable": true}, {"ret": "501228861", "act": "110907757", "sc": "17/11/2026", "dk": "17/11/2026", "digi": 0, "reason": "Số ngày digi invoice trong 30D < 5 ngày (0 ngày)", "recoverable": true}], "hd_cx_list": [{"ret": "501228561", "act": "110400871", "sc": "05/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}, {"ret": "501179337", "act": "110907726", "sc": "17/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}], "ks_list": [{"ticket": "TT9174325", "ret": "500951242", "status": "None", "pts": "0đ", "tru": "-5đ", "reason": "Không có trạng thái Kship (None)", "recoverable": true}]}, {"code": "8231", "full_name": "8231 - Thượng Thái Hiếu - Customer Success - SGN", "short_name": "Thượng Thái Hiếu", "region": "SGN", "level": "Level 3", "kpi": 60, "self_pts": 50, "bu_hd_pts": 0, "bu_pay_pts": 0, "bu_total": 0, "pay_tru": 5, "hd_tru": 0, "ks_tru": 0, "tru_total": 5, "chot": 45, "pct": 75.0, "diff": -15, "status": "ĐANG THIẾU", "bu_hd_list": [], "bu_pay_list": [], "pay_khl_list": [{"ret": "501199047", "act": "110496545", "sc": "09/11/2026", "dk": "09/11/2026", "digi": 3, "reason": "Số ngày digi invoice trong 30D < 5 ngày (3 ngày)", "recoverable": true}], "hd_cx_list": [], "ks_list": []}, {"code": "8178", "full_name": "8178 - Phan Ngọc Nguyên - Customer Success - BĐH", "short_name": "Phan Ngọc Nguyên", "region": "BĐH", "level": "Level 3", "kpi": 60, "self_pts": 35, "bu_hd_pts": 10, "bu_pay_pts": 5, "bu_total": 15, "pay_tru": 0, "hd_tru": 5, "ks_tru": 0, "tru_total": 5, "chot": 45, "pct": 75.0, "diff": -15, "status": "ĐANG THIẾU", "bu_hd_list": [{"ret": "501212313", "act": "109409919", "sc": "13/10/2026", "ph": "04/11/2026", "diff": "22 ngày", "einv": 10691}, {"ret": "501207077", "act": "109094612", "sc": "21/10/2026", "ph": "12/11/2026", "diff": "22 ngày", "einv": 82}], "bu_pay_list": [{"ret": "501003954", "act": "109840284", "sc": "22/10/2026", "old_digi": "3 ngày", "new_digi": "12 ngày"}], "pay_khl_list": [], "hd_cx_list": [{"ret": "500108128", "act": "110360321", "sc": "04/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}], "ks_list": []}, {"code": "8462", "full_name": "8462 - Nguyễn Hoàng Khang - Customer Success", "short_name": "Nguyễn Hoàng Khang", "region": "", "level": "Level 2", "kpi": 45, "self_pts": 30, "bu_hd_pts": 0, "bu_pay_pts": 0, "bu_total": 0, "pay_tru": 0, "hd_tru": 0, "ks_tru": 0, "tru_total": 0, "chot": 30, "pct": 66.7, "diff": -15, "status": "ĐANG THIẾU", "bu_hd_list": [], "bu_pay_list": [], "pay_khl_list": [], "hd_cx_list": [], "ks_list": []}, {"code": "8460", "full_name": "8460 - Lê Minh Hiển - Customer Success - CTO", "short_name": "Lê Minh Hiển", "region": "CTO", "level": "Level 4", "kpi": 75, "self_pts": 55, "bu_hd_pts": 10, "bu_pay_pts": 0, "bu_total": 10, "pay_tru": 15, "hd_tru": 5, "ks_tru": 0, "tru_total": 20, "chot": 45, "pct": 60.0, "diff": -30, "status": "ĐANG THIẾU", "bu_hd_list": [{"ret": "501228871", "act": "110029803", "sc": "28/10/2026", "ph": "14/11/2026", "diff": "17 ngày", "einv": 3}, {"ret": "501212778", "act": "110066766", "sc": "28/10/2026", "ph": "02/11/2026", "diff": "5 ngày", "einv": 3}], "bu_pay_list": [], "pay_khl_list": [{"ret": "501041258", "act": "109949251", "sc": "03/11/2026", "dk": "03/11/2026", "digi": 2, "reason": "Số ngày digi invoice trong 30D < 5 ngày (2 ngày)", "recoverable": true}, {"ret": "501228871", "act": "110832682", "sc": "14/11/2026", "dk": "14/11/2026", "digi": 3, "reason": "Số ngày digi invoice trong 30D < 5 ngày (3 ngày)", "recoverable": true}, {"ret": "501221485", "act": "110835839", "sc": "14/11/2026", "dk": "14/11/2026", "digi": 3, "reason": "Số ngày digi invoice trong 30D < 5 ngày (3 ngày)", "recoverable": true}], "hd_cx_list": [{"ret": "501179060", "act": "110285043", "sc": "04/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}], "ks_list": []}, {"code": "8440", "full_name": "8440 - Doãn Việt Tùng - Customer Success - SGN", "short_name": "Doãn Việt Tùng", "region": "SGN", "level": "Level 3", "kpi": 60, "self_pts": 45, "bu_hd_pts": 0, "bu_pay_pts": 0, "bu_total": 0, "pay_tru": 10, "hd_tru": 0, "ks_tru": 0, "tru_total": 10, "chot": 35, "pct": 58.3, "diff": -25, "status": "ĐANG THIẾU", "bu_hd_list": [], "bu_pay_list": [], "pay_khl_list": [{"ret": "501238328", "act": "110827824", "sc": "14/11/2026", "dk": "13/11/2026", "digi": 5, "reason": "Đã ĐK trước ngày hỗ trợ (13/11/2026)", "recoverable": false}, {"ret": "500475750", "act": "110873956", "sc": "16/11/2026", "dk": "16/11/2026", "digi": 1, "reason": "Số ngày digi invoice trong 30D < 5 ngày (1 ngày)", "recoverable": true}], "hd_cx_list": [], "ks_list": []}, {"code": "8467", "full_name": "8467 - Nguyễn Thành Đạt - Customer Success", "short_name": "Nguyễn Thành Đạt", "region": "", "level": "Level 2", "kpi": 45, "self_pts": 30, "bu_hd_pts": 0, "bu_pay_pts": 0, "bu_total": 0, "pay_tru": 0, "hd_tru": 5, "ks_tru": 0, "tru_total": 5, "chot": 25, "pct": 55.6, "diff": -20, "status": "ĐANG THIẾU", "bu_hd_list": [], "bu_pay_list": [], "pay_khl_list": [], "hd_cx_list": [{"ret": "500916107", "act": "110776211", "sc": "13/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}], "ks_list": []}, {"code": "8448", "full_name": "8448 - Nguyễn Đỗ Nhật Minh - Customer Success", "short_name": "Nguyễn Đỗ Nhật Minh", "region": "", "level": "Level 2", "kpi": 45, "self_pts": 35, "bu_hd_pts": 0, "bu_pay_pts": 5, "bu_total": 5, "pay_tru": 5, "hd_tru": 0, "ks_tru": 10, "tru_total": 15, "chot": 25, "pct": 55.6, "diff": -20, "status": "ĐANG THIẾU", "bu_hd_list": [], "bu_pay_list": [{"ret": "501223754", "act": "110047622", "sc": "29/10/2026", "old_digi": "3 ngày", "new_digi": "20 ngày"}], "pay_khl_list": [{"ret": "200133793", "act": "110789134", "sc": "13/11/2026", "dk": "13/11/2026", "digi": 0, "reason": "Số ngày digi invoice trong 30D < 5 ngày (0 ngày)", "recoverable": true}], "hd_cx_list": [], "ks_list": [{"ticket": "TT9167370", "ret": "501177786", "status": "None", "pts": "0đ", "tru": "-5đ", "reason": "Không có trạng thái Kship (None)", "recoverable": true}, {"ticket": "TT9170000", "ret": "500939267", "status": "None", "pts": "0đ", "tru": "-5đ", "reason": "Không có trạng thái Kship (None)", "recoverable": true}]}, {"code": "8469", "full_name": "8469 - Nguyễn Hưng Hải - Customer Success - GLI", "short_name": "Nguyễn Hưng Hải", "region": "GLI", "level": "Level 3", "kpi": 60, "self_pts": 50, "bu_hd_pts": 0, "bu_pay_pts": 0, "bu_total": 0, "pay_tru": 5, "hd_tru": 20, "ks_tru": 0, "tru_total": 25, "chot": 25, "pct": 41.7, "diff": -35, "status": "ĐANG THIẾU", "bu_hd_list": [], "bu_pay_list": [], "pay_khl_list": [{"ret": "501214663", "act": "110782269", "sc": "13/11/2026", "dk": "13/11/2026", "digi": 3, "reason": "Số ngày digi invoice trong 30D < 5 ngày (3 ngày)", "recoverable": true}], "hd_cx_list": [{"ret": "501100126", "act": "110666255", "sc": "12/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}, {"ret": "501235934", "act": "110599977", "sc": "10/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}, {"ret": "501228490", "act": "110662382", "sc": "11/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}, {"ret": "500993317", "act": "110930305", "sc": "17/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}], "ks_list": []}, {"code": "8447", "full_name": "8447 - Võ Khánh Duy - Customer Success - SGN", "short_name": "Võ Khánh Duy", "region": "SGN", "level": "Level 3", "kpi": 60, "self_pts": 25, "bu_hd_pts": 5, "bu_pay_pts": 0, "bu_total": 5, "pay_tru": 5, "hd_tru": 5, "ks_tru": 0, "tru_total": 10, "chot": 20, "pct": 33.3, "diff": -40, "status": "ĐANG THIẾU", "bu_hd_list": [{"ret": "500958929", "act": "109964868", "sc": "28/10/2026", "ph": "05/11/2026", "diff": "8 ngày", "einv": 21}], "bu_pay_list": [], "pay_khl_list": [{"ret": "501238082", "act": "110819563", "sc": "14/11/2026", "dk": "14/11/2026", "digi": 2, "reason": "Số ngày digi invoice trong 30D < 5 ngày (2 ngày)", "recoverable": true}], "hd_cx_list": [{"ret": "1426732", "act": "110268150", "sc": "02/11/2026", "ph": "15/10/2026", "reason": "Đã phát hành trước ngày SC hỗ trợ (diff=-18 ngày)", "recoverable": false}], "ks_list": []}, {"code": "8484", "full_name": "8484 - Trần Thanh Nam - Customer Success - VTU", "short_name": "Trần Thanh Nam", "region": "VTU", "level": "Level 1", "kpi": 35, "self_pts": 15, "bu_hd_pts": 0, "bu_pay_pts": 0, "bu_total": 0, "pay_tru": 0, "hd_tru": 5, "ks_tru": 0, "tru_total": 5, "chot": 10, "pct": 28.6, "diff": -25, "status": "ĐANG THIẾU", "bu_hd_list": [], "bu_pay_list": [], "pay_khl_list": [], "hd_cx_list": [{"ret": "500323946", "act": "110655136", "sc": "11/11/2026", "ph": "Chưa phát hành", "reason": "Chưa phát hành einvoice", "recoverable": true}], "ks_list": []}, {"code": "8437", "full_name": "8437 - Nguyễn Đoàn Hưng Phát - Customer Success - SGN", "short_name": "Nguyễn Đoàn Hưng Phát", "region": "SGN", "level": "Level 4", "kpi": 75, "self_pts": 20, "bu_hd_pts": 0, "bu_pay_pts": 0, "bu_total": 0, "pay_tru": 0, "hd_tru": 0, "ks_tru": 0, "tru_total": 0, "chot": 20, "pct": 26.7, "diff": -55, "status": "ĐANG THIẾU", "bu_hd_list": [], "bu_pay_list": [], "pay_khl_list": [], "hd_cx_list": [], "ks_list": []}], "zalo_all": "================================================================================\nBÁO CÁO ĐỐI SOÁT KPI ADDON THÁNG 11 (ĐẾN 18/11) - TEAM COACHER: NGUYỄN ÁI QUỐC\n================================================================================\n📊 Tổng số: 16 NS | Đạt ≥100%: 3 NS (18.8%) | Đạt tiến độ ≥60%: 9/16 NS\n🎯 Tổng điểm thực tính: 576/890đ (64.7%)\n\n1. 8466 - Lê Cao Minh Đức - Customer Success - CTO (Level 3)\n   • KPI Addon: 60đ | Tự ghi nhận: 65đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 66/60đ (110.0%) -> ĐẠT (VƯỢT)\n   ✅ CỘNG BÙ PAYMENT T10 SANG T11 (+10đ / 2 ca):\n      + Retailer ID: 501212418 (Act: 109810931) | SC: 22/10/2026 | Digi 31/10: 1 -> 18/11: 14 ngày (Đủ ≥5 ngày trong 30D)\n      + Retailer ID: 500398777 (Act: 110185893) | SC: 30/10/2026 | Digi 31/10: 2 -> 18/11: 19 ngày (Đủ ≥5 ngày trong 30D)\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -5đ / 1 ca]\n        - Retailer ID: 200133606 (Act: 110494616) | SC: 07/11/2026 | ĐK: 07/11/2026 | Digi: 3 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (3 ngày)\n      [Kship T11 điều chỉnh: -4đ / 1 ca]\n        - Ticket: TT9182767 (Retailer: 501091384) | Trạng thái: Bán hàng | Tính: 1đ | Trừ: -4đ | Lý do: Bán hàng (KH đang tìm hiểu: KH mới sử dụng tính năng; cần quen thao tác)\n\n2. 8489 - Nguyễn Hà Anh Vũ - Customer Success - LĐG (Level 2)\n   • KPI Addon: 45đ | Tự ghi nhận: 50đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 45/45đ (100.0%) -> ĐẠT (100%)\n   ✅ CỘNG BÙ HĐĐT T10 SANG T11 (+5đ / 1 ca):\n      + Retailer ID: 500912262 (Act: 110094766) | SC: 30/10/2026 -> Phát hành: 03/11/2026 (4 ngày, 1152 HĐ)\n   ✅ CỘNG BÙ PAYMENT T10 SANG T11 (+5đ / 1 ca):\n      + Retailer ID: 501226547 (Act: 110017827) | SC: 27/10/2026 | Digi 31/10: 1 -> 18/11: 14 ngày (Đủ ≥5 ngày trong 30D)\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -15đ / 3 ca]\n        - Retailer ID: 500367720 (Act: 110411354) | SC: 05/11/2026 | ĐK: 05/11/2026 | Digi: 0 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (0 ngày)\n        - Retailer ID: 501185846 (Act: 110883596) | SC: 16/11/2026 | ĐK: 10/08/2026 | Digi: 30 ngày | Lý do: Đã ĐK trước ngày hỗ trợ (10/08/2026)\n        - Retailer ID: 501235577 (Act: 110909883) | SC: 17/11/2026 | ĐK: 17/11/2026 | Digi: 1 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (1 ngày)\n\n3. 8470 - Lương Trọng Đạo - Customer Success - CTO (Level 3)\n   • KPI Addon: 60đ | Tự ghi nhận: 70đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 60/60đ (100.0%) -> ĐẠT (100%)\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -5đ / 1 ca]\n        - Retailer ID: 501002450 (Act: 110868440) | SC: 16/11/2026 | ĐK: 16/11/2026 | Digi: 2 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (2 ngày)\n      [Kship T11 điều chỉnh: -5đ / 1 ca]\n        - Ticket: TT9130252 (Retailer: 500449231) | Trạng thái: Thất bại | Tính: 0đ | Trừ: -5đ | Lý do: Thất bại (KH bận - lười dùng; việc cá nhân: KH bận - lười dùng; việc cá nhân)\n\n4. 8461 - Trịnh Đức Phong - Customer Success - LĐG (Level 2)\n   • KPI Addon: 45đ | Tự ghi nhận: 30đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 35/45đ (77.8%) -> CÒN THIẾU 10đ\n   ✅ CỘNG BÙ HĐĐT T10 SANG T11 (+10đ / 2 ca):\n      + Retailer ID: 200131297 (Act: 110120784) | SC: 29/10/2026 -> Phát hành: 11/11/2026 (13 ngày, 1 HĐ)\n      + Retailer ID: 501231085 (Act: 110213096) | SC: 31/10/2026 -> Phát hành: 01/11/2026 (1 ngày, 123 HĐ)\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -5đ / 1 ca]\n        - Retailer ID: 501230217 (Act: 110604602) | SC: 10/11/2026 | ĐK: 10/11/2026 | Digi: 0 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (0 ngày)\n\n5. 8458 - Đặng Duy Khương - Customer Success - CTO (Level 3)\n   • KPI Addon: 60đ | Tự ghi nhận: 70đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 45/60đ (75.0%) -> CÒN THIẾU 15đ\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -10đ / 2 ca]\n        - Retailer ID: 501231679 (Act: 110848686) | SC: 16/11/2026 | ĐK: 16/11/2026 | Digi: 1 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (1 ngày)\n        - Retailer ID: 501228861 (Act: 110907757) | SC: 17/11/2026 | ĐK: 17/11/2026 | Digi: 0 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (0 ngày)\n      [HĐĐT check-in T11 chưa phát hành / KHL: -10đ / 2 ca]\n        - Retailer ID: 501228561 (Act: 110400871) | SC: 05/11/2026 | Lý do: Chưa phát hành einvoice\n        - Retailer ID: 501179337 (Act: 110907726) | SC: 17/11/2026 | Lý do: Chưa phát hành einvoice\n      [Kship T11 điều chỉnh: -5đ / 1 ca]\n        - Ticket: TT9174325 (Retailer: 500951242) | Trạng thái: None | Tính: 0đ | Trừ: -5đ | Lý do: Không có trạng thái Kship (None)\n\n6. 8231 - Thượng Thái Hiếu - Customer Success - SGN (Level 3)\n   • KPI Addon: 60đ | Tự ghi nhận: 50đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 45/60đ (75.0%) -> CÒN THIẾU 15đ\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -5đ / 1 ca]\n        - Retailer ID: 501199047 (Act: 110496545) | SC: 09/11/2026 | ĐK: 09/11/2026 | Digi: 3 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (3 ngày)\n\n7. 8178 - Phan Ngọc Nguyên - Customer Success - BĐH (Level 3)\n   • KPI Addon: 60đ | Tự ghi nhận: 35đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 45/60đ (75.0%) -> CÒN THIẾU 15đ\n   ✅ CỘNG BÙ HĐĐT T10 SANG T11 (+10đ / 2 ca):\n      + Retailer ID: 501212313 (Act: 109409919) | SC: 13/10/2026 -> Phát hành: 04/11/2026 (22 ngày, 10691 HĐ)\n      + Retailer ID: 501207077 (Act: 109094612) | SC: 21/10/2026 -> Phát hành: 12/11/2026 (22 ngày, 82 HĐ)\n   ✅ CỘNG BÙ PAYMENT T10 SANG T11 (+5đ / 1 ca):\n      + Retailer ID: 501003954 (Act: 109840284) | SC: 22/10/2026 | Digi 31/10: 3 -> 18/11: 12 ngày (Đủ ≥5 ngày trong 30D)\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [HĐĐT check-in T11 chưa phát hành / KHL: -5đ / 1 ca]\n        - Retailer ID: 500108128 (Act: 110360321) | SC: 04/11/2026 | Lý do: Chưa phát hành einvoice\n\n8. 8462 - Nguyễn Hoàng Khang - Customer Success (Level 2)\n   • KPI Addon: 45đ | Tự ghi nhận: 30đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 30/45đ (66.7%) -> CÒN THIẾU 15đ\n   ✨ Khớp 100% dữ liệu T11, chưa có ca nào bị trừ.\n\n9. 8460 - Lê Minh Hiển - Customer Success - CTO (Level 4)\n   • KPI Addon: 75đ | Tự ghi nhận: 55đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 45/75đ (60.0%) -> CÒN THIẾU 30đ\n   ✅ CỘNG BÙ HĐĐT T10 SANG T11 (+10đ / 2 ca):\n      + Retailer ID: 501228871 (Act: 110029803) | SC: 28/10/2026 -> Phát hành: 14/11/2026 (17 ngày, 3 HĐ)\n      + Retailer ID: 501212778 (Act: 110066766) | SC: 28/10/2026 -> Phát hành: 02/11/2026 (5 ngày, 3 HĐ)\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -15đ / 3 ca]\n        - Retailer ID: 501041258 (Act: 109949251) | SC: 03/11/2026 | ĐK: 03/11/2026 | Digi: 2 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (2 ngày)\n        - Retailer ID: 501228871 (Act: 110832682) | SC: 14/11/2026 | ĐK: 14/11/2026 | Digi: 3 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (3 ngày)\n        - Retailer ID: 501221485 (Act: 110835839) | SC: 14/11/2026 | ĐK: 14/11/2026 | Digi: 3 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (3 ngày)\n      [HĐĐT check-in T11 chưa phát hành / KHL: -5đ / 1 ca]\n        - Retailer ID: 501179060 (Act: 110285043) | SC: 04/11/2026 | Lý do: Chưa phát hành einvoice\n\n10. 8440 - Doãn Việt Tùng - Customer Success - SGN (Level 3)\n   • KPI Addon: 60đ | Tự ghi nhận: 45đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 35/60đ (58.3%) -> CÒN THIẾU 25đ\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -10đ / 2 ca]\n        - Retailer ID: 501238328 (Act: 110827824) | SC: 14/11/2026 | ĐK: 13/11/2026 | Digi: 5 ngày | Lý do: Đã ĐK trước ngày hỗ trợ (13/11/2026)\n        - Retailer ID: 500475750 (Act: 110873956) | SC: 16/11/2026 | ĐK: 16/11/2026 | Digi: 1 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (1 ngày)\n\n11. 8467 - Nguyễn Thành Đạt - Customer Success (Level 2)\n   • KPI Addon: 45đ | Tự ghi nhận: 30đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 25/45đ (55.6%) -> CÒN THIẾU 20đ\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [HĐĐT check-in T11 chưa phát hành / KHL: -5đ / 1 ca]\n        - Retailer ID: 500916107 (Act: 110776211) | SC: 13/11/2026 | Lý do: Chưa phát hành einvoice\n\n12. 8448 - Nguyễn Đỗ Nhật Minh - Customer Success (Level 2)\n   • KPI Addon: 45đ | Tự ghi nhận: 35đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 25/45đ (55.6%) -> CÒN THIẾU 20đ\n   ✅ CỘNG BÙ PAYMENT T10 SANG T11 (+5đ / 1 ca):\n      + Retailer ID: 501223754 (Act: 110047622) | SC: 29/10/2026 | Digi 31/10: 3 -> 18/11: 20 ngày (Đủ ≥5 ngày trong 30D)\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -5đ / 1 ca]\n        - Retailer ID: 200133793 (Act: 110789134) | SC: 13/11/2026 | ĐK: 13/11/2026 | Digi: 0 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (0 ngày)\n      [Kship T11 điều chỉnh: -10đ / 2 ca]\n        - Ticket: TT9167370 (Retailer: 501177786) | Trạng thái: None | Tính: 0đ | Trừ: -5đ | Lý do: Không có trạng thái Kship (None)\n        - Ticket: TT9170000 (Retailer: 500939267) | Trạng thái: None | Tính: 0đ | Trừ: -5đ | Lý do: Không có trạng thái Kship (None)\n\n13. 8469 - Nguyễn Hưng Hải - Customer Success - GLI (Level 3)\n   • KPI Addon: 60đ | Tự ghi nhận: 50đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 25/60đ (41.7%) -> CÒN THIẾU 35đ\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -5đ / 1 ca]\n        - Retailer ID: 501214663 (Act: 110782269) | SC: 13/11/2026 | ĐK: 13/11/2026 | Digi: 3 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (3 ngày)\n      [HĐĐT check-in T11 chưa phát hành / KHL: -20đ / 4 ca]\n        - Retailer ID: 501100126 (Act: 110666255) | SC: 12/11/2026 | Lý do: Chưa phát hành einvoice\n        - Retailer ID: 501235934 (Act: 110599977) | SC: 10/11/2026 | Lý do: Chưa phát hành einvoice\n        - Retailer ID: 501228490 (Act: 110662382) | SC: 11/11/2026 | Lý do: Chưa phát hành einvoice\n        - Retailer ID: 500993317 (Act: 110930305) | SC: 17/11/2026 | Lý do: Chưa phát hành einvoice\n\n14. 8447 - Võ Khánh Duy - Customer Success - SGN (Level 3)\n   • KPI Addon: 60đ | Tự ghi nhận: 25đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 20/60đ (33.3%) -> CÒN THIẾU 40đ\n   ✅ CỘNG BÙ HĐĐT T10 SANG T11 (+5đ / 1 ca):\n      + Retailer ID: 500958929 (Act: 109964868) | SC: 28/10/2026 -> Phát hành: 05/11/2026 (8 ngày, 21 HĐ)\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [Payment T11 chưa đạt / KHL: -5đ / 1 ca]\n        - Retailer ID: 501238082 (Act: 110819563) | SC: 14/11/2026 | ĐK: 14/11/2026 | Digi: 2 ngày | Lý do: Số ngày digi invoice trong 30D < 5 ngày (2 ngày)\n      [HĐĐT check-in T11 chưa phát hành / KHL: -5đ / 1 ca]\n        - Retailer ID: 1426732 (Act: 110268150) | SC: 02/11/2026 | Lý do: Đã phát hành trước ngày SC hỗ trợ (diff=-18 ngày)\n\n15. 8484 - Trần Thanh Nam - Customer Success - VTU (Level 1)\n   • KPI Addon: 35đ | Tự ghi nhận: 15đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 10/35đ (28.6%) -> CÒN THIẾU 25đ\n   ❌ CÁC CA CHƯA ĐƯỢC GHI NHẬN / ĐANG BỊ TRỪ:\n      [HĐĐT check-in T11 chưa phát hành / KHL: -5đ / 1 ca]\n        - Retailer ID: 500323946 (Act: 110655136) | SC: 11/11/2026 | Lý do: Chưa phát hành einvoice\n\n16. 8437 - Nguyễn Đoàn Hưng Phát - Customer Success - SGN (Level 4)\n   • KPI Addon: 75đ | Tự ghi nhận: 20đ\n   👉 ĐIỂM THỰC TÍNH (18/11): 20/75đ (26.7%) -> CÒN THIẾU 55đ\n   ✨ Khớp 100% dữ liệu T11, chưa có ca nào bị trừ.\n"};
+
+let viewMode = 'staff'; // 'staff' | 'cases'
+let staffFilter = 'ALL';
+let caseFilter = 'ALL';
+let openCodes = new Set();
+let allOpen = false;
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function copyText(text, label) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast('✅ Đã copy ' + label)).catch(() => fallbackCopy(text, label));
+  } else {
+    fallbackCopy(text, label);
+  }
+}
+
+function fallbackCopy(text, label) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try { document.execCommand('copy'); showToast('✅ Đã copy ' + label); } catch(e) { showToast('❌ Không thể copy'); }
+  document.body.removeChild(ta);
+}
+
+function copyRet(val, e) {
+  if (e) e.stopPropagation();
+  copyText(val, 'mã ' + val);
+}
+
+function buildPersonZalo(s) {
+  const stLabel = s.diff >= 0 ? s.status : `CÒN THIẾU ${Math.abs(s.diff)}đ`;
+  let lines = [
+    `📌 ${s.full_name} (${s.level})`,
+    `• KPI Addon: ${s.kpi}đ | Tự ghi nhận: ${s.self_pts}đ`,
+    `👉 ĐIỂM THỰC TÍNH (18/11): ${s.chot}/${s.kpi}đ (${s.pct}%) -> ${stLabel}`
+  ];
+  if (s.bu_hd_list.length) {
+    lines.push(`✅ CỘNG BÙ HĐĐT T10 SANG T11 (+${s.bu_hd_pts}đ / ${s.bu_hd_list.length} ca):`);
+    s.bu_hd_list.forEach(b => lines.push(`  + Retailer ${b.ret} (Act: ${b.act}) | SC: ${b.sc} -> PH: ${b.ph} (${b.diff}, ${b.einv} HĐ)`));
+  }
+  if (s.bu_pay_list.length) {
+    lines.push(`✅ CỘNG BÙ PAYMENT T10 SANG T11 (+${s.bu_pay_pts}đ / ${s.bu_pay_list.length} ca):`);
+    s.bu_pay_list.forEach(p => lines.push(`  + Retailer ${p.ret} (Act: ${p.act}) | SC: ${p.sc} | Digi: ${p.old_digi} -> ${p.new_digi}`));
+  }
+  if (s.pay_khl_list.length || s.hd_cx_list.length || s.ks_list.length) {
+    lines.push(`❌ CÁC CA CHƯA GHI NHẬN / ĐANG BỊ TRỪ:`);
+    if (s.pay_khl_list.length) {
+      lines.push(`  [Payment T11: -${s.pay_tru}đ / ${s.pay_khl_list.length} ca]`);
+      s.pay_khl_list.forEach(p => lines.push(`   - Retailer ${p.ret} (SC: ${p.sc}, ĐK: ${p.dk}, Digi: ${p.digi} ngày) -> ${p.reason}`));
+    }
+    if (s.hd_cx_list.length) {
+      lines.push(`  [HĐĐT T11: -${s.hd_tru}đ / ${s.hd_cx_list.length} ca]`);
+      s.hd_cx_list.forEach(h => lines.push(`   - Retailer ${h.ret} (SC: ${h.sc}) -> ${h.reason}`));
+    }
+    if (s.ks_list.length) {
+      lines.push(`  [Kship T11: -${s.ks_tru}đ / ${s.ks_list.length} ca]`);
+      s.ks_list.forEach(k => lines.push(`   - Ticket ${k.ticket} (Ret: ${k.ret}) | ${k.status} | Trừ ${k.tru} -> ${k.reason}`));
+    }
+  } else {
+    lines.push(`✨ Khớp 100% dữ liệu T11, không có ca bị trừ.`);
+  }
+  return lines.join('\n');
+}
+
+function copyPerson(code, e) {
+  if (e) e.stopPropagation();
+  const s = DATA.staff.find(x => x.code === code);
+  if (s) copyText(buildPersonZalo(s), 'báo cáo ' + s.short_name);
+}
+
+function copyAllTeam() {
+  copyText(DATA.zalo_all, 'báo cáo cả Team Quốc');
+}
+
+function toggleAll() {
+  allOpen = !allOpen;
+  if (allOpen) DATA.staff.forEach(s => openCodes.add(s.code));
+  else openCodes.clear();
+  renderMain();
+}
+
+function getAllIssueCases() {
+  let arr = [];
+  DATA.staff.forEach(s => {
+    s.pay_khl_list.forEach(p => arr.push({
+      kind: 'PAY', label: '💳 Payment', staff: s, ret: p.ret, idShow: p.ret, act: p.act,
+      date: p.sc, extra: `ĐK: ${p.dk} • Digi: ${p.digi} ngày`, reason: p.reason,
+      tru: '-5đ', recoverable: p.recoverable
+    }));
+    s.hd_cx_list.forEach(h => arr.push({
+      kind: 'HDDT', label: '🧾 HĐĐT', staff: s, ret: h.ret, idShow: h.ret, act: h.act,
+      date: h.sc, extra: `Phát hành: ${h.ph}`, reason: h.reason,
+      tru: '-5đ', recoverable: h.recoverable
+    }));
+    s.ks_list.forEach(k => arr.push({
+      kind: 'KSHIP', label: '🚚 Kship', staff: s, ret: k.ret, idShow: k.ticket, act: k.ret,
+      date: 'T11/2026', extra: `Retailer: ${k.ret} • TT: ${k.status}`, reason: k.reason,
+      tru: k.tru, recoverable: k.recoverable
+    }));
+  });
+  return arr;
+}
+
+function renderHero() {
+  const st = DATA.staff;
+  const totKpi = st.reduce((a,b)=>a+b.kpi, 0);
+  const totChot = st.reduce((a,b)=>a+b.chot, 0);
+  const totSelf = st.reduce((a,b)=>a+b.self_pts, 0);
+  const pct = (totChot / totKpi * 100).toFixed(1);
+  const p100 = st.filter(x => x.pct >= 100).length;
+  const p60 = st.filter(x => x.pct >= 60).length;
+  const buHd = st.reduce((a,b)=>a+b.bu_hd_pts, 0);
+  const buPay = st.reduce((a,b)=>a+b.bu_pay_pts, 0);
+  const tru = st.reduce((a,b)=>a+b.tru_total, 0);
+  const allCases = getAllIssueCases();
+  document.getElementById('casesCountBadge').textContent = allCases.length;
+
+  document.getElementById('heroSection').innerHTML = `
+    <div class="hero-top">
+      <div>
+        <div class="hero-badge">COACHER NGUYỄN ÁI QUỐC • 18/11/2026</div>
+        <h1>KPI Addon Tháng 11</h1>
+        <div class="hero-sub">16 Nhân sự • Tiến độ chuẩn mốc 18/30 ngày (60%)</div>
+      </div>
+    </div>
+    <div class="hero-score-row">
+      <div class="hero-score-big">${totChot}đ <span>/ ${totKpi}đ</span></div>
+      <div class="hero-pct">${pct}%</div>
+    </div>
+    <div class="hero-bar">
+      <div class="hero-bar-fill" style="width:${Math.min(pct, 100)}%"></div>
+      <div class="hero-bar-mark"></div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-label">🟢 Về đích ≥ 100%</div>
+        <div class="hero-stat-val">${p100} / ${st.length} NS</div>
+        <div class="hero-stat-sub">Minh Đức, Anh Vũ, Trọng Đạo</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">🔵 Đạt tiến độ ≥ 60%</div>
+        <div class="hero-stat-val">${p60} / ${st.length} NS</div>
+        <div class="hero-stat-sub">Còn ${st.length - p60} NS dưới 60%</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">✅ Cộng bù T10 → T11</div>
+        <div class="hero-stat-val">+${buHd + buPay}đ</div>
+        <div class="hero-stat-sub">HĐĐT +${buHd}đ • Pay +${buPay}đ</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-label">⚠️ Đang trừ T11</div>
+        <div class="hero-stat-val">-${tru}đ (${allCases.length} ca)</div>
+        <div class="hero-stat-sub">Tự ghi nhận: ${totSelf}đ</div>
+      </div>
+    </div>
+    <div class="hero-actions">
+      <button class="hero-btn hero-btn-white" onclick="copyAllTeam()">📋 Copy Zalo Cả Team</button>
+      <button class="hero-btn hero-btn-glass" onclick="toggleAll()">↕️ Mở / Đóng hết</button>
+    </div>
+  `;
+}
+
+function renderChips() {
+  const el = document.getElementById('filterChips');
+  if (viewMode === 'staff') {
+    const st = DATA.staff;
+    const c100 = st.filter(x => x.pct >= 100).length;
+    const c60 = st.filter(x => x.pct >= 60 && x.pct < 100).length;
+    const cLow = st.filter(x => x.pct < 60).length;
+    const cBu = st.filter(x => x.bu_total > 0).length;
+    const chips = [
+      ['ALL', `Tất cả (${st.length})`],
+      ['LOW', `🔴 Cần thúc <60% (${cLow})`],
+      ['PASS', `🟢 Đạt 100% (${c100})`],
+      ['MID', `🔵 60–99% (${c60})`],
+      ['BU', `✅ Có bù T10 (${cBu})`]
+    ];
+    el.innerHTML = chips.map(([k, lbl]) => `<button class="chip ${staffFilter===k?'active':''}" onclick="setStaffFilter('${k}')">${lbl}</button>`).join('');
+  } else {
+    const all = getAllIssueCases();
+    const cPay = all.filter(x => x.kind === 'PAY').length;
+    const cHd = all.filter(x => x.kind === 'HDDT').length;
+    const cKs = all.filter(x => x.kind === 'KSHIP').length;
+    const cRec = all.filter(x => x.recoverable).length;
+    const chips = [
+      ['ALL', `Tất cả (${all.length})`],
+      ['REC', `⚡ Kéo lại được (${cRec})`],
+      ['PAY', `💳 Payment (${cPay})`],
+      ['HDDT', `🧾 HĐĐT (${cHd})`],
+      ['KSHIP', `🚚 Kship (${cKs})`]
+    ];
+    el.innerHTML = chips.map(([k, lbl]) => `<button class="chip ${caseFilter===k?'active':''}" onclick="setCaseFilter('${k}')">${lbl}</button>`).join('');
+  }
+}
+
+function switchView(mode) {
+  viewMode = mode;
+  document.getElementById('segStaff').classList.toggle('active', mode === 'staff');
+  document.getElementById('segCases').classList.toggle('active', mode === 'cases');
+  renderChips();
+  renderMain();
+}
+
+function setStaffFilter(f) { staffFilter = f; renderChips(); renderMain(); }
+function setCaseFilter(f) { caseFilter = f; renderChips(); renderMain(); }
+
+function onSearch() {
+  const v = document.getElementById('qInput').value;
+  document.getElementById('clearBtn').classList.toggle('show', v.length > 0);
+  renderMain();
+}
+
+function clearSearch() {
+  document.getElementById('qInput').value = '';
+  document.getElementById('clearBtn').classList.remove('show');
+  renderMain();
+}
+
+function toggleCard(code) {
+  if (openCodes.has(code)) openCodes.delete(code);
+  else openCodes.add(code);
+  const card = document.getElementById('card-' + code);
+  if (card) card.classList.toggle('open', openCodes.has(code));
+}
+
+function renderCardBody(s) {
+  const hasBu = s.bu_hd_list.length || s.bu_pay_list.length;
+  const hasDed = s.pay_khl_list.length || s.hd_cx_list.length || s.ks_list.length;
+  let out = '';
+
+  if (!hasBu && !hasDed) {
+    out += `<div class="clean-ok">✨ Khớp 100% dữ liệu tháng 11, chưa có ca nào bị trừ.</div>`;
+  }
+
+  if (hasBu) {
+    out += `<div class="sec-title c-green"><span>✅ Cộng bù T10 → T11</span><span>+${s.bu_total}đ</span></div>`;
+    s.bu_hd_list.forEach(b => {
+      out += `<div class="case-card is-bu">
+        <div class="case-top">
+          <span class="case-type c-green">🧾 HĐĐT Bù (+5đ)</span>
+          <button class="ret-btn" onclick="copyRet('${b.ret}', event)">ID: ${b.ret}</button>
+        </div>
+        <div class="case-detail">SC: ${b.sc} → Phát hành: <strong>${b.ph}</strong> (${b.diff}, ${b.einv} HĐ)</div>
+      </div>`;
+    });
+    s.bu_pay_list.forEach(p => {
+      out += `<div class="case-card is-bu">
+        <div class="case-top">
+          <span class="case-type c-green">💳 Payment Bù (+5đ)</span>
+          <button class="ret-btn" onclick="copyRet('${p.ret}', event)">ID: ${p.ret}</button>
+        </div>
+        <div class="case-detail">SC: ${p.sc} • Digi 31/10: ${p.old_digi} → 18/11: <strong>${p.new_digi}</strong></div>
+      </div>`;
+    });
+  }
+
+  if (hasDed) {
+    out += `<div class="sec-title c-red"><span>❌ Chưa ghi nhận / Đang trừ T11</span><span>-${s.tru_total}đ</span></div>`;
+    s.pay_khl_list.forEach(p => {
+      out += `<div class="case-card ${p.recoverable ? 'is-rec' : 'is-hard'}">
+        <div class="case-top">
+          <span class="case-type ${p.recoverable ? 'c-amber' : 'c-red'}">💳 Payment (-5đ) • ${p.recoverable ? 'Kéo lại được' : 'Lỗi cứng'}</span>
+          <button class="ret-btn" onclick="copyRet('${p.ret}', event)">ID: ${p.ret}</button>
+        </div>
+        <div class="case-detail">SC: ${p.sc} • ĐK: ${p.dk} • Digi: <strong>${p.digi} ngày</strong></div>
+        <div class="case-reason">${p.reason}</div>
+      </div>`;
+    });
+    s.hd_cx_list.forEach(h => {
+      out += `<div class="case-card ${h.recoverable ? 'is-rec' : 'is-hard'}">
+        <div class="case-top">
+          <span class="case-type ${h.recoverable ? 'c-amber' : 'c-red'}">🧾 HĐĐT (-5đ) • ${h.recoverable ? 'Chờ xuất HĐ' : 'Lỗi cứng'}</span>
+          <button class="ret-btn" onclick="copyRet('${h.ret}', event)">ID: ${h.ret}</button>
+        </div>
+        <div class="case-detail">SC: ${h.sc} • Phát hành: ${h.ph}</div>
+        <div class="case-reason">${h.reason}</div>
+      </div>`;
+    });
+    s.ks_list.forEach(k => {
+      out += `<div class="case-card ${k.recoverable ? 'is-rec' : 'is-hard'}">
+        <div class="case-top">
+          <span class="case-type ${k.recoverable ? 'c-amber' : 'c-red'}">🚚 Kship (${k.tru}) • ${k.status}</span>
+          <button class="ret-btn" onclick="copyRet('${k.ret}', event)">Ret: ${k.ret}</button>
+        </div>
+        <div class="case-detail">Ticket: <strong>${k.ticket}</strong> • Ghi nhận: ${k.pts}</div>
+        <div class="case-reason">${k.reason}</div>
+      </div>`;
+    });
+  }
+
+  out += `<button class="copy-person-btn" onclick="copyPerson('${s.code}', event)">📋 Copy chi tiết gửi Zalo cho ${s.short_name}</button>`;
+  return out;
+}
+
+function renderMain() {
+  const q = document.getElementById('qInput').value.trim().toLowerCase();
+  const wrap = document.getElementById('mainList');
+
+  if (viewMode === 'staff') {
+    const list = DATA.staff.filter(s => {
+      if (staffFilter === 'PASS' && s.pct < 100) return false;
+      if (staffFilter === 'MID' && (s.pct < 60 || s.pct >= 100)) return false;
+      if (staffFilter === 'LOW' && s.pct >= 60) return false;
+      if (staffFilter === 'BU' && s.bu_total === 0) return false;
+      if (q) {
+        const blob = [
+          s.full_name, s.code, s.level,
+          ...s.bu_hd_list.map(x => x.ret),
+          ...s.bu_pay_list.map(x => x.ret),
+          ...s.pay_khl_list.map(x => x.ret),
+          ...s.hd_cx_list.map(x => x.ret),
+          ...s.ks_list.map(x => x.ret + ' ' + x.ticket)
+        ].join(' ').toLowerCase();
+        if (!blob.includes(q)) return false;
+      }
+      return true;
+    });
+
+    if (!list.length) {
+      wrap.innerHTML = `<div class="empty">Không tìm thấy nhân sự hoặc mã gian hàng phù hợp.</div>`;
+      return;
+    }
+
+    wrap.innerHTML = list.map((s, idx) => {
+      const isOpen = openCodes.has(s.code) || (q.length >= 5 && /^\d+$/.test(q));
+      const rankCls = s.pct >= 100 ? 'rank-top' : (s.pct < 45 ? 'rank-low' : '');
+      const colorCls = s.pct >= 100 ? 'c-green' : (s.pct >= 60 ? 'c-blue' : (s.pct >= 40 ? 'c-amber' : 'c-red'));
+      const barCls = s.pct >= 100 ? 'bg-green' : (s.pct >= 60 ? 'bg-blue' : (s.pct >= 40 ? 'bg-amber' : 'bg-red'));
+      const totCases = s.bu_hd_list.length + s.bu_pay_list.length + s.pay_khl_list.length + s.hd_cx_list.length + s.ks_list.length;
+      const diffPill = s.diff > 0
+        ? `<span class="mpill mp-green">Vượt +${s.diff}đ</span>`
+        : (s.diff === 0 ? `<span class="mpill mp-green">Đạt 100%</span>` : `<span class="mpill ${s.pct>=60?'mp-amber':'mp-red'}">Thiếu ${Math.abs(s.diff)}đ</span>`);
+
+      return `
+        <div class="staff-card ${isOpen ? 'open' : ''}" id="card-${s.code}">
+          <div class="card-head" onclick="toggleCard('${s.code}')">
+            <div class="card-row1">
+              <div class="card-left">
+                <div class="rank ${rankCls}">#${idx + 1}</div>
+                <div>
+                  <div class="s-name">${s.short_name}</div>
+                  <div class="s-meta">${s.code} • ${s.level}${s.region ? ' • ' + s.region : ''}</div>
+                </div>
+              </div>
+              <div class="card-right">
+                <div class="s-score ${colorCls}">${s.chot}<small>/${s.kpi}đ</small></div>
+                <div class="s-pct ${colorCls}">${s.pct}%</div>
+              </div>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill ${barCls}" style="width:${Math.min(s.pct, 100)}%"></div>
+              <div class="bar-mark"></div>
+            </div>
+            <div class="mini-pills">
+              <div class="pill-row">
+                <span class="mpill mp-slate">Tự: ${s.self_pts}đ</span>
+                ${s.bu_total > 0 ? `<span class="mpill mp-green">+Bù ${s.bu_total}đ</span>` : ''}
+                ${s.tru_total > 0 ? `<span class="mpill mp-red">-${s.tru_total}đ</span>` : ''}
+                ${diffPill}
+              </div>
+              <span class="expand-hint">${totCases > 0 ? totCases + ' ca' : 'Khớp'} ▾</span>
+            </div>
+          </div>
+          <div class="card-body">${renderCardBody(s)}</div>
+        </div>
+      `;
+    }).join('');
+  } else {
+    let cases = getAllIssueCases().filter(c => {
+      if (caseFilter === 'REC' && !c.recoverable) return false;
+      if (caseFilter === 'PAY' && c.kind !== 'PAY') return false;
+      if (caseFilter === 'HDDT' && c.kind !== 'HDDT') return false;
+      if (caseFilter === 'KSHIP' && c.kind !== 'KSHIP') return false;
+      if (q) {
+        const blob = `${c.staff.full_name} ${c.ret} ${c.idShow} ${c.reason} ${c.label}`.toLowerCase();
+        if (!blob.includes(q)) return false;
+      }
+      return true;
+    });
+
+    if (!cases.length) {
+      wrap.innerHTML = `<div class="empty">Không có ca nào khớp bộ lọc.</div>`;
+      return;
+    }
+
+    wrap.innerHTML = cases.map(c => `
+      <div class="case-card ${c.recoverable ? 'is-rec' : 'is-hard'}" style="margin-bottom:0;box-shadow:0 2px 6px rgba(15,23,42,0.04)">
+        <div class="case-top">
+          <span class="case-type ${c.recoverable ? 'c-amber' : 'c-red'}">${c.label} (${c.tru}) • ${c.recoverable ? 'Kéo được' : 'Lỗi cứng'}</span>
+          <button class="ret-btn" onclick="copyRet('${c.ret}', event)">ID: ${c.ret}</button>
+        </div>
+        <div class="case-detail"><strong>${c.staff.code} - ${c.staff.short_name}</strong> • SC: ${c.date}</div>
+        <div class="case-detail">${c.extra}</div>
+        <div class="case-reason">${c.reason}</div>
+      </div>
+    `).join('');
+  }
+}
+
+renderHero();
+renderChips();
+renderMain();
+</script>
+</body>
+</html>
